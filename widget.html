@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0b1a2a">
+    <link rel="manifest" href="manifest_widget.json?v=1.0.1">
+
+    <title>Saldos RM</title>
+    <style>
+        body { margin: 0; padding: 15px; font-family: system-ui, sans-serif; background-color: #0b1a2a; color: white; }
+        h2 { text-align: center; font-size: 1.1rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .cuenta-container { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
+        .header-cuenta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .titulo-cuenta { font-size: 0.95rem; font-weight: bold; }
+        .total-cuenta { font-size: 1.4rem; font-weight: 800; }
+        
+        /* Desglose Interno del Widget */
+        .desglose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; font-size: 0.78rem; color: #cbd5e1; }
+        .sub-valor { font-weight: bold; color: white; display: inline-block; margin-left: 3px; }
+        
+        .color-banco { color: #60a5fa; }
+        .color-efectivo { color: #34d399; }
+        .color-caja { color: #f59e0b; }
+        .color-viaticos { color: #a78bfa; }
+        .color-danger { color: #f87171; }
+        
+        .btn-volver { display: block; text-align: center; padding: 12px; margin-top: 15px; background: rgba(255,255,255,0.08); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <h2>Monitor Analítico RM</h2>
+    
+    <div class="cuenta-container" style="border-left: 4px solid #60a5fa;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">🏦 Banco Central</span>
+            <span class="total-cuenta color-banco" id="wBanco">$--</span>
+        </div>
+        <div class="desglose-grid">
+            <div>Pagado (Gastos):<span class="sub-valor color-danger" id="wBancoPagado">$0</span></div>
+            <div>Gastos Personales:<span class="sub-valor" id="wBancoPersonal">$0</span></div>
+        </div>
+    </div>
+
+    <div class="cuenta-container" style="border-left: 4px solid #34d399;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">💵 Efectivo General</span>
+            <span class="total-cuenta color-efectivo" id="wEfectivo">$--</span>
+        </div>
+        <div class="desglose-grid">
+            <div>Total Entradas:<span class="sub-valor" id="wEfIngresos" style="color:#34d399;">$0</span></div>
+            <div>Total Salidas:<span class="sub-valor color-danger" id="wEfEgresos">$0</span></div>
+        </div>
+    </div>
+
+    <div class="cuenta-container" style="border-left: 4px solid #f59e0b;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">📦 Caja Chica TR</span>
+            <span class="total-cuenta color-caja" id="wCaja">$--</span>
+        </div>
+        <div class="desglose-grid">
+            <div>Fondeado Banco:<span class="sub-valor" id="wCajaBanco">$0</span></div>
+            <div>Fondeado Efectivo:<span class="sub-valor" id="wCajaEfectivo">$0</span></div>
+            <div style="grid-column: span 2; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
+                Lo Gastado Total:<span class="sub-valor color-danger" id="wCajaGastado">$0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cuenta-container" style="border-left: 4px solid #a78bfa;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">🚛 Viáticos Operador</span>
+            <span class="total-cuenta color-viaticos" id="wViaticos">$--</span>
+        </div>
+        <div class="desglose-grid">
+            <div>Flete/Asignado:<span class="sub-valor" id="wViaAsignado" style="color:#a78bfa;">$0</span></div>
+            <div>Gastado en Ruta:<span class="sub-valor color-danger" id="wViaGastado">$0</span></div>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-volver">+ Registrar Operación</a>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } 
+        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTMr2OwwDr1XR_be7dNmgflEIpLFeb9yQ",
+            authDomain: "finanzas-rm.firebaseapp.com",
+            projectId: "finanzas-rm",
+            storageBucket: "finanzas-rm.firebasestorage.app",
+            messagingSenderId: "907484791503",
+            appId: "1:907484791503:web:b4a13ca01ebca46b31adba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        onSnapshot(collection(db, "operaciones"), (snapshot) => {
+            let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
+            
+            // Sub-métricas dinámicas del widget
+            let bancoPagado = 0; let bancoPersonal = 0;
+            let efIngresos = 0; let efEgresos = 0;
+            let cajaBanco = 0; let cajaEfectivo = 0; let cajaGastado = 0;
+            let viaAsignado = 0; let viaGastado = 0;
+
+            snapshot.forEach(docSnap => {
+                const op = docSnap.data();
+                const m = parseFloat(op.monto) || 0;
+
+                if (op.tipo === "Ingreso") {
+                    if (totales[op.metodo] !== undefined) totales[op.metodo] += m;
+                    
+                    // Estadísticas de Efectivo
+                    if (op.metodo === "Efectivo General") efIngresos += m;
+                    // Estadísticas de Viáticos
+                    if (op.metodo === "Viáticos Operador") viaAsignado += m;
+
+                } else if (op.tipo === "Egreso") {
+                    if (totales[op.metodo] !== undefined) totales[op.metodo] -= m;
+
+                    // Desglose de Banco Central
+                    if (op.metodo === "Banco Central") {
+                        bancoPagado += m;
+                        if (op.empresa === "Empleo" && op.subcuenta === "Gastos Personales") bancoPersonal += m;
+                    }
+                    // Desglose Efectivo
+                    if (op.metodo === "Efectivo General") efEgresos += m;
+                    // Desglose Caja Chica
+                    if (op.metodo === "Caja Chica TR") cajaGastado += m;
+                    // Desglose Viáticos
+                    if (op.metodo === "Viáticos Operador") viaGastado += m;
+
+                } else if (op.tipo === "Intermovimiento") {
+                    if (totales[op.origen] !== undefined) totales[op.origen] -= m;
+                    if (totales[op.destino] !== undefined) totales[op.destino] += m;
+
+                    // Rastrear cómo se fondeó Caja Chica
+                    if (op.destino === "Caja Chica TR") {
+                        if (op.origen === "Banco Central") cajaBanco += m;
+                        if (op.origen === "Efectivo General") cajaEfectivo += m;
+                    }
+                }
+            });
+
+            // Pintar totales generales
+            document.getElementById("wBanco").textContent = `$${totales["Banco Central"].toFixed(2)}`;
+            document.getElementById("wEfectivo").textContent = `$${totales["Efectivo General"].toFixed(2)}`;
+            document.getElementById("wCaja").textContent = `$${totales["Caja Chica TR"].toFixed(2)}`;
+            document.getElementById("wViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
+
+            // Pintar sub-desgloses analíticos pedidos
+            document.getElementById("wBancoPagado").textContent = `$${bancoPagado.toFixed(2)}`;
+            document.getElementById("wBancoPersonal").textContent = `$${bancoPersonal.toFixed(2)}`;
+            document.getElementById("wEfIngresos").textContent = `$${efIngresos.toFixed(2)}`;
+            document.getElementById("wEfEgresos").textContent = `$${efEgresos.toFixed(2)}`;
+            document.getElementById("wCajaBanco").textContent = `$${cajaBanco.toFixed(2)}`;
+            document.getElementById("wCajaEfectivo").textContent = `$${cajaEfectivo.toFixed(2)}`;
+            document.getElementById("wCajaGastado").textContent = `$${cajaGastado.toFixed(2)}`;
+            document.getElementById("wViaAsignado").textContent = `$${viaAsignado.toFixed(2)}`;
+            document.getElementById("wViaGastado").textContent = `$${viaGastado.toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>
