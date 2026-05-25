@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.5">
+    <link rel="manifest" href="manifest.json?v=1.0.6">
 
     <title>Ecosistema Financiero RM</title>
     <style>
@@ -33,8 +33,8 @@
         .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
         .btn-eliminar:hover { background: var(--danger); color: white; }
         
-        .btn-reporte { background: var(--success); margin-top: 5px; }
-        .btn-reporte:hover { background: #218838; }
+        .btn-reporte { background: var(--secondary); margin-top: 5px; }
+        .btn-excel { background: var(--success); margin-top: 5px; }
 
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -47,39 +47,25 @@
         .txt-inter { color: var(--secondary); font-weight: bold; }
         
         .campo-dinamico { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 8px; margin-top: 5px; display: none; }
-        
-        /* Tabla del Histórico */
         .tabla-contenedor { overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-        th { background: #f1f5f9; padding: 8px; border-bottom: 2px solid #cbd5e1; font-weight: 600; }
+        th { background: #f1f5f9; padding: 8px; border-bottom: 2px solid #cbd5e1; }
         td { padding: 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
-        tr:hover { background: #f8fafc; }
     </style>
 </head>
 <body>
 
     <h2 style="text-align: center; color: var(--primary); margin-bottom: 15px;">Ecosistema Central RM</h2>
 
-    <div class="card" style="background: #0b1a2a; color: white; box-shadow: 0 6px 16px rgba(11,26,42,0.25);">
+    <div class="card" style="background: #0b1a2a; color: white;">
         <h3 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.15);">💰 Saldos en Tiempo Real</h3>
         <div class="grid-saldos">
-            <div class="saldo-box">
-                <small>🏦 Banco Central</small>
-                <div id="monBanco" style="color: #60a5fa;">$0.00</div>
-            </div>
-            <div class="saldo-box">
-                <small>💵 Efectivo General</small>
-                <div id="monEfectivo" style="color: #34d399;">$0.00</div>
-            </div>
-            <div class="saldo-box">
-                <small>📦 Caja Chica TR</small>
-                <div id="monCajaChica" style="color: #f59e0b;">$0.00</div>
-            </div>
-            <div class="saldo-box">
-                <small>🚛 Viáticos Operador</small>
-                <div id="monViaticos" style="color: #a78bfa;">$0.00</div>
-            </div>
+            <div class="saldo-box"><small>🏦 Banco Central</small><div id="monBanco" style="color: #60a5fa;">$0.00</div></div>
+            <div class="saldo-box"><small>💵 Efectivo General</small><div id="monEfectivo" style="color: #34d399;">$0.00</div></div>
+            <div class="saldo-box"><small>📦 Caja Chica TR</small><div id="monCajaChica" style="color: #f59e0b;">$0.00</div></div>
+            <div class="saldo-box"><small>🚛 Viáticos Operador</small><div id="monViaticos" style="color: #a78bfa;">$0.00</div></div>
         </div>
+        <a href="widget.html" style="color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 15px; text-align: center; text-decoration: none;">[Abrir Vista Widget Avanzado]</a>
     </div>
 
     <div class="card" style="border-left: 4px solid var(--danger);">
@@ -96,23 +82,22 @@
 
     <div class="card">
         <h3>Nueva Operación / Flujo</h3>
-        
-        <label>Naturaleza del Movimiento</label>
+        <label>Naturaleza</label>
         <select id="tipoOperacion" onchange="actualizarSubcuentas()">
-            <option value="Ingreso">📈 Ingreso (Entrada de Dinero)</option>
-            <option value="Egreso">📉 Egreso (Gasto / Salida)</option>
+            <option value="Ingreso">📈 Ingreso (Entrada)</option>
+            <option value="Egreso">📉 Egreso (Gasto)</option>
             <option value="Intermovimiento">🔁 Intermovimiento (Traspaso)</option>
         </select>
 
-        <label>Unidad de Negocio Asociada</label>
+        <label>Unidad de Negocio</label>
         <select id="unidadNegocio" onchange="actualizarSubcuentas()">
             <option value="Transportes Ramirez">Transportes Ramirez</option>
             <option value="Asistencia Vial RM">Asistencia Vial RM</option>
             <option value="Empleo">Empleo Personal / Ingresos</option>
-            <option value="Uber">Uber (Ecosistema Compartido)</option>
+            <option value="Uber">Uber</option>
         </select>
 
-        <label id="lblSubcuenta">Sub-cuenta o Categoría</label>
+        <label id="lblSubcuenta">Categoría</label>
         <select id="subCuenta" onchange="evaluarCamposEspeciales()"></select>
 
         <div id="wrapperComensales" class="campo-dinamico">
@@ -121,14 +106,14 @@
         </div>
 
         <div id="camposTraspaso" style="display:none;">
-            <label>Cuenta de Origen</label>
+            <label>Origen</label>
             <select id="cuentaOrigen">
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
-            <label>Cuenta de Destino</label>
+            <label>Destino</label>
             <select id="cuentaDestino">
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
@@ -137,7 +122,7 @@
             </select>
         </div>
 
-        <label>Monto de la Operación</label>
+        <label>Monto y Destino líquido</label>
         <div style="display: flex; gap: 10px;">
             <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
             <select id="metodoPago" style="flex: 0.8;">
@@ -148,44 +133,27 @@
             </select>
         </div>
 
-        <label>Fecha y Hora del Registro</label>
+        <label>Fecha y Hora</label>
         <input type="datetime-local" id="fechaOp">
 
-        <label>Concepto General / Detalle del Gasto</label>
-        <input type="text" id="conceptoOp" placeholder="Nota aclaratoria, folio o flete...">
+        <label>Concepto Aclaratorio</label>
+        <input type="text" id="conceptoOp" placeholder="Detalles o descripción del flujo...">
         
-        <button id="btnGuardar">Guardar Registro en la Nube</button>
+        <button id="btnGuardar">Guardar Registro Permanente</button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--success);">
-        <h3>📋 Reporte Detallado e Histórico Completo</h3>
-        <p style="font-size: 0.85rem; color: #666; margin-top: -5px;">Consulta todo el pasado financiero almacenado sin límites de fecha.</p>
-        
-        <label>Seleccionar Área de Auditoría</label>
-        <select id="reporteArea">
-            <option value="Todos">Consolidado Total Corporativo</option>
-            <option value="Transportes Ramirez">Transportes Ramirez</option>
-            <option value="Asistencia Vial RM">Asistencia Vial RM</option>
-            <option value="Uber">Uber</option>
-            <option value="Empleo">Empleo Personal</option>
-        </select>
-        
-        <button class="btn-reporte" id="btnCargarHistorico">Consultar Historial Completo</button>
+        <h3>📋 Histórico y Respaldo de Seguridad</h3>
+        <button class="btn-reporte" id="btnCargarHistorico">Ver Tabla Histórica</button>
+        <button class="btn-excel" id="btnExportarExcel">📥 Descargar Hoja de Cálculo (CSV)</button>
 
         <div class="tabla-contenedor">
             <table>
                 <thead>
-                    <tr>
-                        <th>Fecha/Área</th>
-                        <th>Detalles / Categoría</th>
-                        <th>Monto</th>
-                        <th>Acción</th>
-                    </tr>
+                    <tr><th>Fecha</th><th>Detalles</th><th>Monto</th><th>Borrar</th></tr>
                 </thead>
                 <tbody id="cuerpoTablaHistorico">
-                    <tr>
-                        <td colspan="4" style="color: #94a3b8; text-align: center;">Presiona el botón para cargar el histórico acumulado.</td>
-                    </tr>
+                    <tr><td colspan="4" style="color: #94a3b8; text-align: center;">Usa los botones para auditar o respaldar la información.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -195,7 +163,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where, deleteDoc, doc } 
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc, doc } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -209,6 +177,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        let listaGlobalMovimientos = [];
 
         function reiniciarFechaA_Ahora() {
             const ahora = new Date();
@@ -219,30 +188,18 @@
 
         window.mostrarNotificacion = function(mensaje, colorFondo = "#333") {
             const toast = document.getElementById("toast");
-            toast.textContent = mensaje;
-            toast.style.backgroundColor = colorFondo;
-            toast.className = "show";
+            toast.textContent = mensaje; toast.style.backgroundColor = colorFondo; toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // CATEGORÍAS CORREGIDAS
         const subcuentasNegocio = {
             "Transportes Ramirez": {
                 "Ingreso": ["Viáticos Personales", "Caja Chica"],
                 "Egreso": ["Caja Chica - Comida", "Caja Chica - Otro Concepto", "Viáticos - Gasolina", "Viáticos - Casetas", "Viáticos - Otro Gasto"]
             },
-            "Asistencia Vial RM": {
-                "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"],
-                "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento Equipo", "Insumos"]
-            },
-            "Empleo": {
-                "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas"],
-                "Egreso": ["Gastos Fijos", "Gastos Personales"]
-            },
-            "Uber": {
-                "Ingreso": ["Corte Turno", "Depósito App"],
-                "Egreso": ["Gasolina Uber", "Lavado", "Comisiones", "Mantenimiento"]
-            }
+            "Asistencia Vial RM": { "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"], "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento", "Insumos"] },
+            "Empleo": { "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas"], "Egreso": ["Gastos Fijos", "Gastos Personales"] },
+            "Uber": { "Ingreso": ["Corte Turno", "Depósito App"], "Egreso": ["Gasolina Uber", "Lavado", "Comisiones", "Mantenimiento"] }
         };
 
         window.actualizarSubcuentas = function() {
@@ -252,37 +209,32 @@
             const camposTraspaso = document.getElementById("camposTraspaso");
 
             if (tipo === "Intermovimiento") {
-                subSelector.style.display = "none";
-                document.getElementById("lblSubcuenta").style.display = "none";
-                camposTraspaso.style.display = "block";
-                document.getElementById("wrapperComensales").style.display = "none";
+                subSelector.style.display = "none"; document.getElementById("lblSubcuenta").style.display = "none";
+                camposTraspaso.style.display = "block"; document.getElementById("wrapperComensales").style.display = "none";
             } else {
-                subSelector.style.display = "block";
-                document.getElementById("lblSubcuenta").style.display = "block";
-                camposTraspaso.style.display = "none";
-                subSelector.innerHTML = "";
+                subSelector.style.display = "block"; document.getElementById("lblSubcuenta").style.display = "block";
+                camposTraspaso.style.display = "none"; subSelector.innerHTML = "";
                 subcuentasNegocio[empresa][tipo].forEach(opt => {
-                    let el = document.createElement("option");
-                    el.value = opt; el.textContent = opt;
-                    subSelector.appendChild(el);
+                    let el = document.createElement("option"); el.value = opt; el.textContent = opt; subSelector.appendChild(el);
                 });
                 evaluarCamposEspeciales();
             }
         }
 
         window.evaluarCamposEspeciales = function() {
-            const subcuenta = document.getElementById("subCuenta").value;
-            const wrapper = document.getElementById("wrapperComensales");
-            if (subcuenta === "Caja Chica - Comida") wrapper.style.display = "block";
-            else { wrapper.style.display = "none"; document.getElementById("personasComieron").value = ""; }
+            if (document.getElementById("subCuenta").value === "Caja Chica - Comida") document.getElementById("wrapperComensales").style.display = "block";
+            else { document.getElementById("wrapperComensales").style.display = "none"; document.getElementById("personasComieron").value = ""; }
         }
         actualizarSubcuentas();
 
-        // ESCUCHA DE SALDOS CONSTANTES
+        // SALDOS CONSTANTES EN TIEMPO REAL
         onSnapshot(collection(db, "operaciones"), (snapshot) => {
             let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
+            listaGlobalMovimientos = [];
             snapshot.forEach(docSnap => {
                 const op = docSnap.data();
+                op.id = docSnap.id;
+                listaGlobalMovimientos.push(op);
                 const m = parseFloat(op.monto) || 0;
                 if (op.tipo === "Ingreso" && totales[op.metodo] !== undefined) totales[op.metodo] += m;
                 else if (op.tipo === "Egreso" && totales[op.metodo] !== undefined) totales[op.metodo] -= m;
@@ -297,123 +249,98 @@
             document.getElementById("monViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
         });
 
-        // BOTONES DE VIERNES AUTOMÁTICOS
         window.registrarGastoFijo = async function(nombre, monto) {
-            if(!confirm(`¿Liquidar ${nombre} por $${monto}?`)) return;
-            const datos = {
-                tipo: "Egreso", empresa: "Empleo", subcuenta: "Gastos Fijos",
-                monto: monto, metodo: "Banco Central", concepto: `Pago Fijo: ${nombre}`,
-                fecha: new Date().toISOString()
-            };
+            if(!confirm(`¿Liquidar ${nombre}?`)) return;
             try {
-                await addDoc(collection(db, "operaciones"), datos);
-                mostrarNotificacion(`✅ Gasto de ${nombre} registrado con éxito`, "#28a745");
-                ejecutarConsultaHistorica(); // Refrescar reporte si está visible
-            } catch(err) { alert("Error: " + err); }
+                await addDoc(collection(db, "operaciones"), {
+                    tipo: "Egreso", empresa: "Empleo", subcuenta: "Gastos Fijos",
+                    monto: monto, metodo: "Banco Central", concepto: `Pago Fijo: ${nombre}`, fecha: new Date().toISOString()
+                });
+                mostrarNotificacion(`✅ ${nombre} guardado permanentemente`, "#28a745");
+            } catch(err) { alert(err); }
         }
 
-        // GUARDAR REGISTRO MANUAL
         document.getElementById("btnGuardar").addEventListener("click", async () => {
             const monto = parseFloat(document.getElementById("montoOp").value);
             let concepto = document.getElementById("conceptoOp").value.trim();
             const tipo = document.getElementById("tipoOperacion").value;
             const fechaElegida = document.getElementById("fechaOp").value;
-            const subcuenta = document.getElementById("subCuenta").value;
-            
-            if(isNaN(monto) || monto <= 0) return mostrarNotificacion("❌ Ingrese un monto válido", "#dc3545");
-            if(!fechaElegida) return mostrarNotificacion("❌ Seleccione una fecha válida", "#dc3545");
+
+            if(isNaN(monto) || monto <= 0 || !fechaElegida) return mostrarNotificacion("❌ Datos incompletos", "#dc3545");
 
             let datos = {
                 tipo: tipo, empresa: document.getElementById("unidadNegocio").value,
-                monto: monto, metodo: document.getElementById("metodoPago").value,
-                fecha: new Date(fechaElegida).toISOString()
+                monto: monto, metodo: document.getElementById("metodoPago").value, fecha: new Date(fechaElegida).toISOString()
             };
 
             if (tipo === "Intermovimiento") {
                 datos.origen = document.getElementById("cuentaOrigen").value;
                 datos.destino = document.getElementById("cuentaDestino").value;
-                datos.subcuenta = `Traspaso: ${datos.origen} -> ${datos.destino}`;
-                datos.concepto = concepto || "Traspaso de fondos";
+                datos.subcuenta = `Traspaso`;
+                datos.concepto = concepto || `De ${datos.origen} a ${datos.destino}`;
             } else {
-                datos.subcuenta = subcuenta;
-                if (subcuenta === "Caja Chica - Comida") {
-                    const personas = document.getElementById("personasComieron").value.trim();
-                    datos.personasComensales = personas || "No especificado";
-                    datos.concepto = (concepto ? concepto + " | " : "") + "Comensales: " + datos.personasComensales;
+                datos.subcuenta = document.getElementById("subCuenta").value;
+                if (datos.subcuenta === "Caja Chica - Comida") {
+                    datos.concepto = "Comensales: " + (document.getElementById("personasComieron").value.trim() || "Varios") + " | " + concepto;
                 } else { datos.concepto = concepto || "Sin descripción"; }
             }
 
             try {
                 await addDoc(collection(db, "operaciones"), datos);
-                document.getElementById("montoOp").value = "";
-                document.getElementById("conceptoOp").value = "";
-                document.getElementById("personasComieron").value = "";
-                reiniciarFechaA_Ahora();
-                actualizarSubcuentas();
-                mostrarNotificacion("✅ Operación guardada de forma permanente", "#28a745");
-                ejecutarConsultaHistorica(); // Refrescar reporte si está abierto
-            } catch (err) { alert("Error: " + err); }
+                document.getElementById("montoOp").value = ""; document.getElementById("conceptoOp").value = "";
+                reiniciarFechaA_Ahora(); actualizarSubcuentas();
+                mostrarNotificacion("✅ Guardado de forma vitalicia", "#28a745");
+            } catch (err) { alert(err); }
         });
 
-        // CONSULTOR HISTÓRICO AVANZADO (PROCESADOR DE REPORTES)
-        async function ejecutarConsultaHistorica() {
-            const area = document.getElementById("reporteArea").value;
+        // PINTAR HISTÓRICO COMPLETO
+        document.getElementById("btnCargarHistorico").addEventListener("click", () => {
             const tabla = document.getElementById("cuerpoTablaHistorico");
-            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#64748b;'>Procesando base de datos completa...</td></tr>";
-
-            let consultaQuery = collection(db, "operaciones");
-            if (area !== "Todos") {
-                consultaQuery = query(collection(db, "operaciones"), where("empresa", "==", area));
+            tabla.innerHTML = "";
+            if (listaGlobalMovimientos.length === 0) {
+                tabla.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay registros guardados.</td></tr>";
+                return;
             }
+            listaGlobalMovimientos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+            listaGlobalMovimientos.forEach(op => {
+                let c = op.tipo === "Ingreso" ? "txt-ingreso" : (op.tipo === "Egreso" ? "txt-egreso" : "txt-inter");
+                let f = new Date(op.fecha).toLocaleDateString([], {day:'2-digit',month:'2-digit'});
+                tabla.innerHTML += `
+                    <tr>
+                        <td><strong>${f}</strong><br><small>${op.empresa}</small></td>
+                        <td><small><b>${op.subcuenta}</b></small><br>${op.concepto}</td>
+                        <td class="${c}">$${op.monto.toFixed(2)}</td>
+                        <td><button class="btn-eliminar" onclick="eliminarMovimiento('${op.id}')">❌</button></td>
+                    </tr>`;
+            });
+        });
 
-            try {
-                const querySnapshot = await getDocs(consultaQuery);
-                tabla.innerHTML = "";
-
-                if (querySnapshot.empty) {
-                    tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>No hay registros para esta unidad de negocio.</td></tr>";
-                    return;
-                }
-
-                // Ordenar localmente por fecha descendente
-                let registros = [];
-                querySnapshot.forEach(docSnap => {
-                    registros.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-                registros.forEach(op => {
-                    let clase = "txt-egreso"; let s = "-";
-                    if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
-                    if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
-
-                    const f = new Date(op.fecha).toLocaleDateString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
-
-                    tabla.innerHTML += `
-                        <tr>
-                            <td><strong>${f}</strong><br><span style="color:#64748b; font-size:0.75rem;">${op.empresa}</span></td>
-                            <td><small style="color:var(--secondary); font-weight:600;">${op.subcuenta}</small><br><span style="color:#475569; font-size:0.8rem;">${op.concepto}</span></td>
-                            <td class="${clase}">${s}$${op.monto.toFixed(2)}<br><span style="font-size:0.7rem; color:#94a3b8;">${op.metodo || 'Traspaso'}</span></td>
-                            <td><button class="btn-eliminar" style="padding:4px 8px;" onclick="eliminarHistorico('${op.id}')">❌</button></td>
-                        </tr>
-                    `;
-                });
-            } catch (err) {
-                tabla.innerHTML = `<tr><td colspan='4' style='color:var(--danger); text-align:center;'>Error de conexión: ${err}</td></tr>`;
-            }
+        window.eliminarMovimiento = async function(id) {
+            if(!confirm("¿Eliminar de la nube?")) return;
+            await deleteDoc(doc(db, "operaciones", id));
+            mostrarNotificacion("🗑️ Eliminado permanentemente", "#dc3545");
+            document.getElementById("btnCargarHistorico").click();
         }
 
-        document.getElementById("btnCargarHistorico").addEventListener("click", ejecutarConsultaHistorica);
+        // FUNCIÓN MAESTRA: EXPORTACIÓN EN FORMATO HOJA DE CÁLCULO (.CSV)
+        document.getElementById("btnExportarExcel").addEventListener("click", () => {
+            if (listaGlobalMovimientos.length === 0) return alert("No hay datos cargados para exportar.");
+            
+            let contenidoCsv = "ID,Fecha,Empresa,Tipo,Subcuenta,Monto,Metodo_Cuenta,Concepto_Detalle\n";
+            listaGlobalMovimientos.forEach(op => {
+                let fila = `"${op.id}","${op.fecha}","${op.empresa}","${op.tipo}","${op.subcuenta}",${op.monto},"${op.metodo || op.origen}","${op.concepto.replace(/"/g, '""')}"`;
+                contenidoCsv += fila + "\n";
+            });
 
-        // CONFIGURACIÓN DE ELIMINACIÓN DESDE EL REPORTE
-        window.eliminarHistorico = async function(id) {
-            if(!confirm("⚠️ ¿Deseas borrar permanentemente este registro del reporte e historial?")) return;
-            try {
-                await deleteDoc(doc(db, "operaciones", id));
-                mostrarNotificacion("🗑️ Registro eliminado con éxito", "#dc3545");
-                ejecutarConsultaHistorica(); // Refrescar tabla automáticamente
-            } catch (error) { alert("Error: " + error); }
-        }
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), contenidoCsv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Reporte_Financiero_RM_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            mostrarNotificacion("📥 Descarga completada para Excel", "#28a745");
+        });
     </script>
 </body>
 </html>
