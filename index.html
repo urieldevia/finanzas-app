@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.6">
+    <link rel="manifest" href="manifest.json?v=1.0.7">
 
     <title>Ecosistema Financiero RM</title>
     <style>
@@ -24,7 +24,7 @@
         .grid-saldos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .saldo-box { background: rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
         .saldo-box small { display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
-        .saldo-box div { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
+        .saldo-box div { font-size: 1.15rem; font-weight: 700; margin-top: 4px; }
 
         .grid-fijos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; margin: 0; }
@@ -60,10 +60,13 @@
     <div class="card" style="background: #0b1a2a; color: white;">
         <h3 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.15);">💰 Saldos en Tiempo Real</h3>
         <div class="grid-saldos">
-            <div class="saldo-box"><small>🏦 Banco Central</small><div id="monBanco" style="color: #60a5fa;">$0.00</div></div>
+            <div class="saldo-box"><small>🏦 Azteca Principal</small><div id="monAztecaPrincipal" style="color: #60a5fa;">$0.00</div></div>
+            <div class="saldo-box"><small>💰 Azteca Guardadito</small><div id="monAztecaGuardadito" style="color: #38bdf8;">$0.00</div></div>
+            <div class="saldo-box"><small>📈 Azteca Ahorro</small><div id="monAztecaAhorro" style="color: #0ea5e9;">$0.00</div></div>
+            <div class="saldo-box"><small>💙 BBVA</small><div id="monBBVA" style="color: #a3e635;">$0.00</div></div>
             <div class="saldo-box"><small>💵 Efectivo General</small><div id="monEfectivo" style="color: #34d399;">$0.00</div></div>
             <div class="saldo-box"><small>📦 Caja Chica TR</small><div id="monCajaChica" style="color: #f59e0b;">$0.00</div></div>
-            <div class="saldo-box"><small>🚛 Viáticos Operador</small><div id="monViaticos" style="color: #a78bfa;">$0.00</div></div>
+            <div class="saldo-box" style="grid-column: span 2;"><small>🚛 Viáticos Operador</small><div id="monViaticos" style="color: #a78bfa;">$0.00</div></div>
         </div>
         <a href="widget.html" style="color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 15px; text-align: center; text-decoration: none;">[Abrir Vista Widget Avanzado]</a>
     </div>
@@ -108,25 +111,34 @@
         <div id="camposTraspaso" style="display:none;">
             <label>Origen</label>
             <select id="cuentaOrigen">
+                <option value="Azteca - Principal">🏦 Azteca - Principal</option>
+                <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
+                <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
+                <option value="BBVA">💙 BBVA</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
-                <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
             <label>Destino</label>
             <select id="cuentaDestino">
-                <option value="Banco Central">🏦 Banco Central</option>
+                <option value="Azteca - Principal">🏦 Azteca - Principal</option>
+                <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
+                <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
+                <option value="BBVA">💙 BBVA</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
         </div>
 
-        <label>Monto y Destino líquido</label>
+        <label>Monto y Cuenta Aplicada</label>
         <div style="display: flex; gap: 10px;">
             <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
             <select id="metodoPago" style="flex: 0.8;">
-                <option value="Banco Central">🏦 Banco Central</option>
+                <option value="Azteca - Principal">🏦 Azteca - Principal</option>
+                <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
+                <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
+                <option value="BBVA">💙 BBVA</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
@@ -227,15 +239,24 @@
         }
         actualizarSubcuentas();
 
-        // SALDOS CONSTANTES EN TIEMPO REAL
+        // MATRIZ DE CÁLCULO DE SALDOS CON LAS NUEVAS CUENTAS BANCARIAS
         onSnapshot(collection(db, "operaciones"), (snapshot) => {
-            let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
+            let totales = {
+                "Azteca - Principal": 0,
+                "Azteca - Guardadito": 0,
+                "Azteca - Ahorro": 0,
+                "BBVA": 0,
+                "Efectivo General": 0,
+                "Caja Chica TR": 0,
+                "Viáticos Operador": 0
+            };
             listaGlobalMovimientos = [];
             snapshot.forEach(docSnap => {
                 const op = docSnap.data();
                 op.id = docSnap.id;
                 listaGlobalMovimientos.push(op);
                 const m = parseFloat(op.monto) || 0;
+                
                 if (op.tipo === "Ingreso" && totales[op.metodo] !== undefined) totales[op.metodo] += m;
                 else if (op.tipo === "Egreso" && totales[op.metodo] !== undefined) totales[op.metodo] -= m;
                 else if (op.tipo === "Intermovimiento") {
@@ -243,7 +264,11 @@
                     if (totales[op.destino] !== undefined) totales[op.destino] += m;
                 }
             });
-            document.getElementById("monBanco").textContent = `$${totales["Banco Central"].toFixed(2)}`;
+            
+            document.getElementById("monAztecaPrincipal").textContent = `$${totales["Azteca - Principal"].toFixed(2)}`;
+            document.getElementById("monAztecaGuardadito").textContent = `$${totales["Azteca - Guardadito"].toFixed(2)}`;
+            document.getElementById("monAztecaAhorro").textContent = `$${totales["Azteca - Ahorro"].toFixed(2)}`;
+            document.getElementById("monBBVA").textContent = `$${totales["BBVA"].toFixed(2)}`;
             document.getElementById("monEfectivo").textContent = `$${totales["Efectivo General"].toFixed(2)}`;
             document.getElementById("monCajaChica").textContent = `$${totales["Caja Chica TR"].toFixed(2)}`;
             document.getElementById("monViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
@@ -251,12 +276,13 @@
 
         window.registrarGastoFijo = async function(nombre, monto) {
             if(!confirm(`¿Liquidar ${nombre}?`)) return;
+            // Se descuentan de Azteca Principal por defecto
             try {
                 await addDoc(collection(db, "operaciones"), {
                     tipo: "Egreso", empresa: "Empleo", subcuenta: "Gastos Fijos",
-                    monto: monto, metodo: "Banco Central", concepto: `Pago Fijo: ${nombre}`, fecha: new Date().toISOString()
+                    monto: monto, metodo: "Azteca - Principal", concepto: `Pago Fijo: ${nombre}`, fecha: new Date().toISOString()
                 });
-                mostrarNotificacion(`✅ ${nombre} guardado permanentemente`, "#28a745");
+                mostrarNotificacion(`✅ ${nombre} guardado en Azteca Principal`, "#28a745");
             } catch(err) { alert(err); }
         }
 
@@ -293,7 +319,6 @@
             } catch (err) { alert(err); }
         });
 
-        // PINTAR HISTÓRICO COMPLETO
         document.getElementById("btnCargarHistorico").addEventListener("click", () => {
             const tabla = document.getElementById("cuerpoTablaHistorico");
             tabla.innerHTML = "";
@@ -318,28 +343,23 @@
         window.eliminarMovimiento = async function(id) {
             if(!confirm("¿Eliminar de la nube?")) return;
             await deleteDoc(doc(db, "operaciones", id));
-            mostrarNotificacion("🗑️ Eliminado permanentemente", "#dc3545");
+            mostrarNotificacion("🗑rm; Eliminado permanentemente", "#dc3545");
             document.getElementById("btnCargarHistorico").click();
         }
 
-        // FUNCIÓN MAESTRA: EXPORTACIÓN EN FORMATO HOJA DE CÁLCULO (.CSV)
         document.getElementById("btnExportarExcel").addEventListener("click", () => {
             if (listaGlobalMovimientos.length === 0) return alert("No hay datos cargados para exportar.");
-            
             let contenidoCsv = "ID,Fecha,Empresa,Tipo,Subcuenta,Monto,Metodo_Cuenta,Concepto_Detalle\n";
             listaGlobalMovimientos.forEach(op => {
                 let fila = `"${op.id}","${op.fecha}","${op.empresa}","${op.tipo}","${op.subcuenta}",${op.monto},"${op.metodo || op.origen}","${op.concepto.replace(/"/g, '""')}"`;
                 contenidoCsv += fila + "\n";
             });
-
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), contenidoCsv], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.setAttribute("download", `Reporte_Financiero_RM_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            mostrarNotificacion("📥 Descarga completada para Excel", "#28a745");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            mostrarNotificacion("📥 Descarga completada", "#28a745");
         });
     </script>
 </body>
