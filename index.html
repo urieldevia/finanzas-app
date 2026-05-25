@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,26 +33,32 @@
         .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
         .btn-eliminar:hover { background: var(--danger); color: white; }
         
+        .btn-reporte { background: var(--success); margin-top: 5px; }
+        .btn-reporte:hover { background: #218838; }
+
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
 
-        #btnInstalar { display: none; background: var(--accent); margin-bottom: 20px; }
         .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
         .txt-ingreso { color: var(--success); font-weight: bold; }
         .txt-egreso { color: var(--danger); font-weight: bold; }
         .txt-inter { color: var(--secondary); font-weight: bold; }
         
-        /* Animación para resaltar campos dinámicos */
         .campo-dinamico { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 8px; margin-top: 5px; display: none; }
+        
+        /* Tabla del Histórico */
+        .tabla-contenedor { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        th { background: #f1f5f9; padding: 8px; border-bottom: 2px solid #cbd5e1; font-weight: 600; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        tr:hover { background: #f8fafc; }
     </style>
 </head>
 <body>
 
     <h2 style="text-align: center; color: var(--primary); margin-bottom: 15px;">Ecosistema Central RM</h2>
-    
-    <button id="btnInstalar">📲 Anclar App a Pantalla Principal</button>
 
     <div class="card" style="background: #0b1a2a; color: white; box-shadow: 0 6px 16px rgba(11,26,42,0.25);">
         <h3 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.15);">💰 Saldos en Tiempo Real</h3>
@@ -77,7 +80,6 @@
                 <div id="monViaticos" style="color: #a78bfa;">$0.00</div>
             </div>
         </div>
-        <a href="widget.html" style="color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 15px; text-align: center; text-decoration: none;">[Abrir Vista Widget]</a>
     </div>
 
     <div class="card" style="border-left: 4px solid var(--danger);">
@@ -115,7 +117,7 @@
 
         <div id="wrapperComensales" class="campo-dinamico">
             <label style="color: #92400e; margin-top: 0;">¿Quiénes comieron? (Nombres)</label>
-            <input type="text" id="personasComieron" placeholder="Ej. Said Hernandez, Luis Francisco, Juan Antonio..." style="border: 1px solid #f59e0b; margin-bottom: 5px;">
+            <input type="text" id="personasComieron" placeholder="Ej. Said Hernandez, Luis Francisco...">
         </div>
 
         <div id="camposTraspaso" style="display:none;">
@@ -150,21 +152,50 @@
         <input type="datetime-local" id="fechaOp">
 
         <label>Concepto General / Detalle del Gasto</label>
-        <input type="text" id="conceptoOp" placeholder="Especificar concepto si seleccionó 'Otro'...">
+        <input type="text" id="conceptoOp" placeholder="Nota aclaratoria, folio o flete...">
         
-        <button id="btnGuardar">Guardar Registro</button>
+        <button id="btnGuardar">Guardar Registro en la Nube</button>
     </div>
 
-    <div class="card">
-        <h3>Últimos Movimientos Registrados</h3>
-        <div id="historialSincro">Conectando con la nube...</div>
+    <div class="card" style="border-top: 4px solid var(--success);">
+        <h3>📋 Reporte Detallado e Histórico Completo</h3>
+        <p style="font-size: 0.85rem; color: #666; margin-top: -5px;">Consulta todo el pasado financiero almacenado sin límites de fecha.</p>
+        
+        <label>Seleccionar Área de Auditoría</label>
+        <select id="reporteArea">
+            <option value="Todos">Consolidado Total Corporativo</option>
+            <option value="Transportes Ramirez">Transportes Ramirez</option>
+            <option value="Asistencia Vial RM">Asistencia Vial RM</option>
+            <option value="Uber">Uber</option>
+            <option value="Empleo">Empleo Personal</option>
+        </select>
+        
+        <button class="btn-reporte" id="btnCargarHistorico">Consultar Historial Completo</button>
+
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha/Área</th>
+                        <th>Detalles / Categoría</th>
+                        <th>Monto</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaHistorico">
+                    <tr>
+                        <td colspan="4" style="color: #94a3b8; text-align: center;">Presiona el botón para cargar el histórico acumulado.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="toast">Acción realizada con éxito.</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc } 
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where, deleteDoc, doc } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -194,7 +225,7 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // CONTROL DE CATEGORIZACIÓN CORREGIDO Y ACTUALIZADO
+        // CATEGORÍAS CORREGIDAS
         const subcuentasNegocio = {
             "Transportes Ramirez": {
                 "Ingreso": ["Viáticos Personales", "Caja Chica"],
@@ -242,18 +273,12 @@
         window.evaluarCamposEspeciales = function() {
             const subcuenta = document.getElementById("subCuenta").value;
             const wrapper = document.getElementById("wrapperComensales");
-            
-            if (subcuenta === "Caja Chica - Comida") {
-                wrapper.style.display = "block";
-            } else {
-                wrapper.style.display = "none";
-                document.getElementById("personasComieron").value = "";
-            }
+            if (subcuenta === "Caja Chica - Comida") wrapper.style.display = "block";
+            else { wrapper.style.display = "none"; document.getElementById("personasComieron").value = ""; }
         }
-        
         actualizarSubcuentas();
 
-        // PERSISTENCIA MONITOR SALDOS
+        // ESCUCHA DE SALDOS CONSTANTES
         onSnapshot(collection(db, "operaciones"), (snapshot) => {
             let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
             snapshot.forEach(docSnap => {
@@ -283,6 +308,7 @@
             try {
                 await addDoc(collection(db, "operaciones"), datos);
                 mostrarNotificacion(`✅ Gasto de ${nombre} registrado con éxito`, "#28a745");
+                ejecutarConsultaHistorica(); // Refrescar reporte si está visible
             } catch(err) { alert("Error: " + err); }
         }
 
@@ -298,10 +324,8 @@
             if(!fechaElegida) return mostrarNotificacion("❌ Seleccione una fecha válida", "#dc3545");
 
             let datos = {
-                tipo: tipo,
-                empresa: document.getElementById("unidadNegocio").value,
-                monto: monto,
-                metodo: document.getElementById("metodoPago").value,
+                tipo: tipo, empresa: document.getElementById("unidadNegocio").value,
+                monto: monto, metodo: document.getElementById("metodoPago").value,
                 fecha: new Date(fechaElegida).toISOString()
             };
 
@@ -312,14 +336,11 @@
                 datos.concepto = concepto || "Traspaso de fondos";
             } else {
                 datos.subcuenta = subcuenta;
-                // Si es comida, añadimos las personas directamente al concepto para preservarlo a futuro
                 if (subcuenta === "Caja Chica - Comida") {
                     const personas = document.getElementById("personasComieron").value.trim();
                     datos.personasComensales = personas || "No especificado";
                     datos.concepto = (concepto ? concepto + " | " : "") + "Comensales: " + datos.personasComensales;
-                } else {
-                    datos.concepto = concepto || "Sin descripción";
-                }
+                } else { datos.concepto = concepto || "Sin descripción"; }
             }
 
             try {
@@ -329,43 +350,70 @@
                 document.getElementById("personasComieron").value = "";
                 reiniciarFechaA_Ahora();
                 actualizarSubcuentas();
-                mostrarNotificacion("✅ Operación sincronizada de inmediato", "#28a745");
-            } catch (err) { alert("Error al guardar: " + err); }
+                mostrarNotificacion("✅ Operación guardada de forma permanente", "#28a745");
+                ejecutarConsultaHistorica(); // Refrescar reporte si está abierto
+            } catch (err) { alert("Error: " + err); }
         });
 
-        // ELIMINAR MOVIMIENTO
-        window.eliminarMovimiento = async function(id) {
-            if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar este registro permanentemente de la nube?")) return;
+        // CONSULTOR HISTÓRICO AVANZADO (PROCESADOR DE REPORTES)
+        async function ejecutarConsultaHistorica() {
+            const area = document.getElementById("reporteArea").value;
+            const tabla = document.getElementById("cuerpoTablaHistorico");
+            tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#64748b;'>Procesando base de datos completa...</td></tr>";
+
+            let consultaQuery = collection(db, "operaciones");
+            if (area !== "Todos") {
+                consultaQuery = query(collection(db, "operaciones"), where("empresa", "==", area));
+            }
+
             try {
-                await deleteDoc(doc(db, "operaciones", id));
-                mostrarNotificacion("🗑️ Registro eliminado de todas las cuentas", "#dc3545");
-            } catch (error) { alert("Error: " + error); }
+                const querySnapshot = await getDocs(consultaQuery);
+                tabla.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    tabla.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#94a3b8;'>No hay registros para esta unidad de negocio.</td></tr>";
+                    return;
+                }
+
+                // Ordenar localmente por fecha descendente
+                let registros = [];
+                querySnapshot.forEach(docSnap => {
+                    registros.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+                registros.forEach(op => {
+                    let clase = "txt-egreso"; let s = "-";
+                    if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
+                    if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
+
+                    const f = new Date(op.fecha).toLocaleDateString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+
+                    tabla.innerHTML += `
+                        <tr>
+                            <td><strong>${f}</strong><br><span style="color:#64748b; font-size:0.75rem;">${op.empresa}</span></td>
+                            <td><small style="color:var(--secondary); font-weight:600;">${op.subcuenta}</small><br><span style="color:#475569; font-size:0.8rem;">${op.concepto}</span></td>
+                            <td class="${clase}">${s}$${op.monto.toFixed(2)}<br><span style="font-size:0.7rem; color:#94a3b8;">${op.metodo || 'Traspaso'}</span></td>
+                            <td><button class="btn-eliminar" style="padding:4px 8px;" onclick="eliminarHistorico('${op.id}')">❌</button></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tabla.innerHTML = `<tr><td colspan='4' style='color:var(--danger); text-align:center;'>Error de conexión: ${err}</td></tr>`;
+            }
         }
 
-        // HISTORIAL DINÁMICO
-        const qRecientes = query(collection(db, "operaciones"), orderBy("fecha", "desc"), limit(15));
-        onSnapshot(qRecientes, (snapshot) => {
-            const historialDiv = document.getElementById("historialSincro");
-            historialDiv.innerHTML = "";
-            snapshot.forEach(docSnap => {
-                const op = docSnap.data();
-                let clase = "txt-egreso"; let s = "-";
-                if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
-                if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
-                const fHumana = new Date(op.fecha).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
-                historialDiv.innerHTML += `
-                    <div class="log-entry">
-                        <div style="flex:1;">
-                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">(${op.concepto})</span><br>
-                            <small style="color:#64748b">${op.subcuenta}</small> | <small style="color:#94a3b8;">${fHumana}</small>
-                        </div>
-                        <div style="text-align: right;">
-                            <div class="${clase}" style="margin-bottom: 5px;">${s} $${op.monto.toFixed(2)}</div>
-                            <button class="btn-eliminar" onclick="eliminarMovimiento('${docSnap.id}')">❌</button>
-                        </div>
-                    </div>`;
-            });
-        });
+        document.getElementById("btnCargarHistorico").addEventListener("click", ejecutarConsultaHistorica);
+
+        // CONFIGURACIÓN DE ELIMINACIÓN DESDE EL REPORTE
+        window.eliminarHistorico = async function(id) {
+            if(!confirm("⚠️ ¿Deseas borrar permanentemente este registro del reporte e historial?")) return;
+            try {
+                await deleteDoc(doc(db, "operaciones", id));
+                mostrarNotificacion("🗑️ Registro eliminado con éxito", "#dc3545");
+                ejecutarConsultaHistorica(); // Refrescar tabla automáticamente
+            } catch (error) { alert("Error: " + error); }
+        }
     </script>
 </body>
 </html>
