@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.8">
+    <link rel="manifest" href="manifest.json?v=1.0.10">
 
     <title>Ecosistema Financiero RM</title>
     <style>
@@ -62,7 +62,7 @@
             <div class="saldo-box"><small>📈 Azteca Ahorro</small><div id="monAztecaAhorro" style="color: #0ea5e9;">$0.00</div></div>
             <div class="saldo-box"><small>💙 BBVA</small><div id="monBBVA" style="color: #a3e635;">$0.00</div></div>
             <div class="saldo-box"><small>💵 Efectivo General</small><div id="monEfectivo" style="color: #34d399;">$0.00</div></div>
-            <div class="saldo-box"><small>📦 Caja Chica TR</small><div id="monCajaChica" style="color: #f59e0b;">$0.00</div></div>
+            <div class="saldo-box"><small>📦 Caja Chica TR (Física)</small><div id="monCajaChica" style="color: #f59e0b;">$0.00</div></div>
             <div class="saldo-box" style="grid-column: span 2;"><small>🚛 Viáticos Operador</small><div id="monViaticos" style="color: #a78bfa;">$0.00</div></div>
         </div>
         <a href="widget.html" style="color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 15px; text-align: center; text-decoration: none;">[Abrir Vista Widget Avanzado]</a>
@@ -83,14 +83,14 @@
     <div class="card">
         <h3>Nueva Operación / Flujo</h3>
         
-        <label>Naturaleza (Asegúrate de elegir bien)</label>
+        <label>Naturaleza</label>
         <select id="tipoOperacion" onchange="actualizarSubcuentas()">
-            <option value="Ingreso">📈 Ingreso (Ganancia / Entrada)</option>
-            <option value="Egreso">📉 Egreso (Gasto / Comida / Casetas)</option>
-            <option value="Intermovimiento">🔁 Intermovimiento (Pasar de un Banco a otro)</option>
+            <option value="Ingreso">📈 Ingreso (Entrada directa)</option>
+            <option value="Egreso">📉 Egreso (Gasto o Pago)</option>
+            <option value="Intermovimiento">🔁 Intermovimiento (Fondeo o Traspaso)</option>
         </select>
         
-        <div id="alertaInter" class="alerta-texto">💡 Los Intermovimientos no registran gastos. Solo úsalos para fondear cuentas (Ej. Mandar dinero a Caja Chica).</div>
+        <div id="alertaInter" class="alerta-texto">💡 Selecciona origen y destino. Esto no resta dinero global, solo lo cambia de bolsa.</div>
 
         <label>Unidad de Negocio</label>
         <select id="unidadNegocio" onchange="actualizarSubcuentas()">
@@ -111,23 +111,23 @@
         <div id="camposTraspaso" style="display:none; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
             <label style="margin-top: 0;">¿De dónde sale el dinero? (Origen)</label>
             <select id="cuentaOrigen">
+                <option value="BBVA">💙 BBVA</option>
                 <option value="Azteca - Principal">🏦 Azteca - Principal</option>
                 <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
                 <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
-                <option value="BBVA">💙 BBVA</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
-                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Caja Chica TR">📦 Caja Chica TR (Física)</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
             <label>¿A dónde llega el dinero? (Destino)</label>
             <select id="cuentaDestino">
-                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Caja Chica TR">📦 Caja Chica TR (Física)</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
+                <option value="BBVA">💙 BBVA</option>
                 <option value="Azteca - Principal">🏦 Azteca - Principal</option>
                 <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
                 <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
-                <option value="BBVA">💙 BBVA</option>
             </select>
         </div>
 
@@ -137,11 +137,11 @@
                 <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
                 <select id="metodoPago" style="flex: 0.8;">
                     <option value="BBVA">💙 BBVA</option>
-                    <option value="Caja Chica TR">📦 Caja Chica TR</option>
                     <option value="Azteca - Principal">🏦 Azteca - Principal</option>
                     <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
                     <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
                     <option value="Efectivo General">💵 Efectivo General</option>
+                    <option value="Caja Chica TR">📦 Caja Chica TR (Física)</option>
                     <option value="Viáticos Operador">🚛 Viáticos Operador</option>
                 </select>
             </div>
@@ -151,7 +151,7 @@
         <input type="datetime-local" id="fechaOp">
 
         <label>Concepto Aclaratorio</label>
-        <input type="text" id="conceptoOp" placeholder="Detalles, facturas o notas...">
+        <input type="text" id="conceptoOp" placeholder="Detalles o persona responsable...">
         
         <button id="btnGuardar">Guardar Registro Permanente</button>
     </div>
@@ -164,12 +164,7 @@
         <div class="tabla-contenedor">
             <table>
                 <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Detalles</th>
-                        <th>Monto</th>
-                        <th style="text-align: center;">Borrar</th>
-                    </tr>
+                    <tr><th>Fecha</th><th>Detalles</th><th>Monto</th><th style="text-align: center;">Borrar</th></tr>
                 </thead>
                 <tbody id="cuerpoTablaHistorico">
                     <tr><td colspan="4" style="color: #94a3b8; text-align: center;">Presiona "Ver Tabla Histórica" para cargar.</td></tr>
@@ -214,7 +209,7 @@
         const subcuentasNegocio = {
             "Transportes Ramirez": {
                 "Ingreso": ["Viáticos Personales", "Caja Chica", "Flete General", "Reembolso Operativo", "Otros"],
-                "Egreso": ["Caja Chica - Comida", "Caja Chica - Otro Concepto", "Viáticos - Gasolina", "Viáticos - Casetas", "Viáticos - Otro Gasto"]
+                "Egreso": ["Caja Chica - Comida", "Caja Chica - Otro Concepto", "Viáticos - Gasolina", "Viáticos - Casetas", "Viáticos - Otro Gasto", "Mantenimiento"]
             },
             "Asistencia Vial RM": { "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"], "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento", "Insumos"] },
             "Empleo": { "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas"], "Egreso": ["Gastos Fijos", "Gastos Personales"] },
@@ -234,14 +229,14 @@
                 camposTraspaso.style.display = "block"; document.getElementById("wrapperComensales").style.display = "none";
                 alertaInter.style.display = "block";
                 labelMetodo.textContent = "Monto a Transferir";
-                document.getElementById("metodoPago").style.display = "none"; // Ocultar el dropdown normal
+                document.getElementById("metodoPago").style.display = "none"; 
             } else {
                 subSelector.style.display = "block"; document.getElementById("lblSubcuenta").style.display = "block";
                 camposTraspaso.style.display = "none"; subSelector.innerHTML = "";
                 alertaInter.style.display = "none";
                 document.getElementById("metodoPago").style.display = "block";
                 
-                labelMetodo.textContent = tipo === "Ingreso" ? "¿A qué cuenta entró el dinero?" : "¿De qué cuenta salió el dinero? (Cuenta Aplicada)";
+                labelMetodo.textContent = tipo === "Ingreso" ? "¿A qué cuenta entró el dinero?" : "¿De qué cuenta salió el dinero?";
                 
                 subcuentasNegocio[empresa][tipo].forEach(opt => {
                     let el = document.createElement("option"); el.value = opt; el.textContent = opt; subSelector.appendChild(el);
@@ -251,8 +246,15 @@
         }
 
         window.evaluarCamposEspeciales = function() {
-            if (document.getElementById("subCuenta").value === "Caja Chica - Comida") document.getElementById("wrapperComensales").style.display = "block";
+            const sub = document.getElementById("subCuenta").value;
+            const selectMetodo = document.getElementById("metodoPago");
+            
+            if (sub === "Caja Chica - Comida") document.getElementById("wrapperComensales").style.display = "block";
             else { document.getElementById("wrapperComensales").style.display = "none"; document.getElementById("personasComieron").value = ""; }
+
+            // IMPORTANTE: Ya no bloqueamos la cuenta. Le damos la libertad al usuario de elegir BBVA, Efectivo o Caja Chica física.
+            selectMetodo.style.pointerEvents = "auto";
+            selectMetodo.style.opacity = "1";
         }
         actualizarSubcuentas();
 
@@ -316,7 +318,7 @@
                 datos.subcuenta = `Traspaso`;
                 datos.concepto = concepto || `Fondos movidos`;
             } else {
-                datos.metodo = document.getElementById("metodoPago").value; // Toma el banco aplicado
+                datos.metodo = document.getElementById("metodoPago").value; 
                 datos.subcuenta = document.getElementById("subCuenta").value;
                 
                 if (datos.subcuenta === "Caja Chica - Comida") {
@@ -333,7 +335,6 @@
             } catch (err) { alert(err); }
         });
 
-        // PINTAR LA PAPELETA IGUAL A TU IMAGEN PERO MÁS CLARA
         document.getElementById("btnCargarHistorico").addEventListener("click", () => {
             const tabla = document.getElementById("cuerpoTablaHistorico");
             tabla.innerHTML = "";
@@ -346,7 +347,6 @@
                 let colorMonto = op.tipo === "Ingreso" ? "var(--success)" : "var(--primary)";
                 let f = new Date(op.fecha).toLocaleDateString([], {day:'2-digit',month:'2-digit'});
                 
-                // Esta línea naranja te salvará la vida para auditar: te dice a qué cuenta de banco se fue o de dónde salió.
                 let cuentaImpactada = op.tipo === "Intermovimiento" ? `${op.origen} ➔ ${op.destino}` : op.metodo;
 
                 tabla.innerHTML += `
