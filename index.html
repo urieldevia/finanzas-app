@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0b1a2a">
+    <link rel="manifest" href="manifest.json?v=1.0.4">
+
+    <title>Ecosistema Financiero RM</title>
+    <style>
+        :root { --primary: #0b1a2a; --secondary: #1a365d; --success: #28a745; --danger: #dc3545; --accent: #e67e22; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #eaeff5; padding: 15px; max-width: 500px; margin: auto; color: #333; padding-bottom: 60px; }
+        .card { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h3 { margin-top: 0; color: var(--primary); font-size: 1.15rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        label { font-size: 0.85rem; color: #666; font-weight: 600; margin-top: 12px; display: block; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button { background: var(--primary); color: white; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
+        
+        .grid-saldos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .saldo-box { background: rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .saldo-box small { display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+        .saldo-box div { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
+
+        .grid-fijos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; margin: 0; }
+        .btn-fijo span { display: block; color: var(--danger); font-weight: bold; margin-top: 3px; }
+        
+        .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
+        
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        #btnInstalar { display: none; background: var(--accent); margin-bottom: 20px; }
+        .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .txt-ingreso { color: var(--success); font-weight: bold; }
+        .txt-egreso { color: var(--danger); font-weight: bold; }
+        .txt-inter { color: var(--secondary); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 15px;">Ecosistema Central RM</h2>
+    
+    <button id="btnInstalar">📲 Anclar App a Pantalla Principal</button>
+
+    <div class="card" style="background: #0b1a2a; color: white; box-shadow: 0 6px 16px rgba(11,26,42,0.25);">
+        <h3 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.15);">💰 Saldos en Tiempo Real</h3>
+        <div class="grid-saldos">
+            <div class="saldo-box">
+                <small>🏦 Banco Central</small>
+                <div id="monBanco" style="color: #60a5fa;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>💵 Efectivo General</small>
+                <div id="monEfectivo" style="color: #34d399;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>📦 Caja Chica TR</small>
+                <div id="monCajaChica" style="color: #f59e0b;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>🚛 Viáticos Operador</small>
+                <div id="monViaticos" style="color: #a78bfa;">$0.00</div>
+            </div>
+        </div>
+        <a href="widget.html" style="color: #94a3b8; font-size: 0.8rem; display: block; margin-top: 15px; text-align: center; text-decoration: none;">[Abrir Vista Widget]</a>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--danger);">
+        <h3>📅 Pagos de Viernes y Gastos Fijos</h3>
+        <div class="grid-fijos">
+            <button class="btn-fijo" onclick="registrarGastoFijo('Azteca (Semanal)', 555)">Banco Azteca <span>$555</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Tanda (Semanal)', 500)">Tanda <span>$500</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Gasto (Semanal)', 600)">Gasto Semanal <span>$600</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Telmex (Mensual)', 600)">Telmex <span>$600</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Netflix (Mensual)', 390)">Netflix <span>$390</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Spotify (Mensual)', 250)">Spotify <span>$250</span></button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Nueva Operación / Flujo</h3>
+        <select id="tipoOperacion" onchange="actualizarSubcuentas()">
+            <option value="Ingreso">📈 Ingreso (Entrada)</option>
+            <option value="Egreso">📉 Egreso (Salida)</option>
+            <option value="Intermovimiento">🔁 Intermovimiento (Traspaso)</option>
+        </select>
+
+        <select id="unidadNegocio" onchange="actualizarSubcuentas()">
+            <option value="Empleo">Empleo Personal / Ingresos</option>
+            <option value="Transportes Ramirez">Transportes Ramirez</option>
+            <option value="Asistencia Vial RM">Asistencia Vial RM</option>
+            <option value="Uber">Uber (Corte Turno)</option>
+        </select>
+
+        <select id="subCuenta"></select>
+
+        <div id="camposTraspaso" style="display:none;">
+            <select id="cuentaOrigen">
+                <option value="Efectivo General">💵 Efectivo General</option>
+                <option value="Banco Central">🏦 Banco Central</option>
+                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
+            </select>
+            <select id="cuentaDestino">
+                <option value="Banco Central">🏦 Banco Central</option>
+                <option value="Efectivo General">💵 Efectivo General</option>
+                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="montoOp" placeholder="$ Monto" step="0.01" style="flex: 1.2;">
+            <select id="metodoPago" style="flex: 0.8;">
+                <option value="Banco Central">🏦 Banco</option>
+                <option value="Efectivo General">💵 Efectivo</option>
+                <option value="Caja Chica TR">📦 Caja Chica</option>
+                <option value="Viáticos Operador">🚛 Viáticos</option>
+            </select>
+        </div>
+
+        <input type="datetime-local" id="fechaOp">
+        <input type="text" id="conceptoOp" placeholder="Concepto (Ej. Combustible, Luis Francisco...)">
+        
+        <button id="btnGuardar">Guardar Registro</button>
+    </div>
+
+    <div class="card">
+        <h3>Últimos Movimientos Registrados</h3>
+        <div id="historialSincro">Conectando con la nube...</div>
+    </div>
+
+    <div id="toast">Acción realizada con éxito.</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc } 
+        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTMr2OwwDr1XR_be7dNmgflEIpLFeb9yQ",
+            authDomain: "finanzas-rm.firebaseapp.com",
+            projectId: "finanzas-rm",
+            storageBucket: "finanzas-rm.firebasestorage.app",
+            messagingSenderId: "907484791503",
+            appId: "1:907484791503:web:b4a13ca01ebca46b31adba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function reiniciarFechaA_Ahora() {
+            const ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            document.getElementById('fechaOp').value = ahora.toISOString().slice(0, 16);
+        }
+        reiniciarFechaA_Ahora();
+
+        window.mostrarNotificacion = function(mensaje, colorFondo = "#333") {
+            const toast = document.getElementById("toast");
+            toast.textContent = mensaje;
+            toast.style.backgroundColor = colorFondo;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        let eventoInstalacion;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            eventoInstalacion = e;
+            document.getElementById('btnInstalar').style.display = 'block';
+        });
+        document.getElementById('btnInstalar').addEventListener('click', async () => {
+            if (eventoInstalacion) {
+                eventoInstalacion.prompt();
+                const { outcome } = await eventoInstalacion.userChoice;
+                if (outcome === 'accepted') document.getElementById('btnInstalar').style.display = 'none';
+                eventoInstalacion = null;
+            }
+        });
+
+        const subcuentasNegocio = {
+            "Empleo": { "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas"], "Egreso": ["Gastos Fijos", "Gastos Personales"] },
+            "Transportes Ramirez": { "Ingreso": ["Flete General", "Reembolso Operativo", "Otros"], "Egreso": ["Caja Chica TR", "Viáticos", "Combustible", "Casetas", "Mantenimiento"] },
+            "Asistencia Vial RM": { "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"], "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento", "Insumos"] },
+            "Uber": { "Ingreso": ["Corte Turno", "Depósito App"], "Egreso": ["Gasolina Uber", "Lavado", "Comisiones", "Mantenimiento"] }
+        };
+
+        window.actualizarSubcuentas = function() {
+            const tipo = document.getElementById("tipoOperacion").value;
+            const empresa = document.getElementById("unidadNegocio").value;
+            const subSelector = document.getElementById("subCuenta");
+            const camposTraspaso = document.getElementById("camposTraspaso");
+
+            if (tipo === "Intermovimiento") {
+                subSelector.style.display = "none";
+                camposTraspaso.style.display = "block";
+            } else {
+                subSelector.style.display = "block";
+                camposTraspaso.style.display = "none";
+                subSelector.innerHTML = "";
+                subcuentasNegocio[empresa][tipo].forEach(opt => {
+                    let el = document.createElement("option");
+                    el.value = opt; el.textContent = opt;
+                    subSelector.appendChild(el);
+                });
+            }
+        }
+        actualizarSubcuentas();
+
+        onSnapshot(collection(db, "operaciones"), (snapshot) => {
+            let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
+            snapshot.forEach(docSnap => {
+                const op = docSnap.data();
+                const m = parseFloat(op.monto) || 0;
+                if (op.tipo === "Ingreso" && totales[op.metodo] !== undefined) totales[op.metodo] += m;
+                else if (op.tipo === "Egreso" && totales[op.metodo] !== undefined) totales[op.metodo] -= m;
+                else if (op.tipo === "Intermovimiento") {
+                    if (totales[op.origen] !== undefined) totales[op.origen] -= m;
+                    if (totales[op.destino] !== undefined) totales[op.destino] += m;
+                }
+            });
+            document.getElementById("monBanco").textContent = `$${totales["Banco Central"].toFixed(2)}`;
+            document.getElementById("monEfectivo").textContent = `$${totales["Efectivo General"].toFixed(2)}`;
+            document.getElementById("monCajaChica").textContent = `$${totales["Caja Chica TR"].toFixed(2)}`;
+            document.getElementById("monViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
+        });
+
+        window.registrarGastoFijo = async function(nombre, monto) {
+            if(!confirm(`¿Liquidar ${nombre} por $${monto}?`)) return;
+            const datos = {
+                tipo: "Egreso", empresa: "Empleo", subcuenta: "Gastos Fijos",
+                monto: monto, metodo: "Banco Central", concepto: `Pago Fijo: ${nombre}`,
+                fecha: new Date().toISOString()
+            };
+            try {
+                await addDoc(collection(db, "operaciones"), datos);
+                mostrarNotificacion(`✅ ${nombre} liquidado`, "#28a745");
+            } catch(err) { alert("Error: " + err); }
+        }
+
+        document.getElementById("btnGuardar").addEventListener("click", async () => {
+            const monto = parseFloat(document.getElementById("montoOp").value);
+            const concepto = document.getElementById("conceptoOp").value.trim();
+            const tipo = document.getElementById("tipoOperacion").value;
+            const fechaElegida = document.getElementById("fechaOp").value;
+            
+            if(isNaN(monto) || monto <= 0) return mostrarNotificacion("❌ Ingrese un monto válido", "#dc3545");
+            if(!fechaElegida) return mostrarNotificacion("❌ Seleccione una fecha válida", "#dc3545");
+
+            let datos = {
+                tipo: tipo, empresa: document.getElementById("unidadNegocio").value,
+                monto: monto, metodo: document.getElementById("metodoPago").value,
+                concepto: concepto || "Sin descripción",
+                fecha: new Date(fechaElegida).toISOString()
+            };
+            if (tipo === "Intermovimiento") {
+                datos.origen = document.getElementById("cuentaOrigen").value;
+                datos.destino = document.getElementById("cuentaDestino").value;
+                datos.subcuenta = `Traspaso: ${datos.origen} -> ${datos.destino}`;
+            } else { datos.subcuenta = document.getElementById("subCuenta").value; }
+
+            try {
+                await addDoc(collection(db, "operaciones"), datos);
+                document.getElementById("montoOp").value = "";
+                document.getElementById("conceptoOp").value = "";
+                reiniciarFechaA_Ahora();
+                mostrarNotificacion("✅ Operación guardada", "#28a745");
+            } catch (err) { alert("Error: " + err); }
+        });
+
+        window.eliminarMovimiento = async function(id) {
+            if(!confirm("⚠️ ¿Eliminar permanentemente este movimiento?")) return;
+            try {
+                await deleteDoc(doc(db, "operaciones", id));
+                mostrarNotificacion("🗑️ Eliminado", "#dc3545");
+            } catch (error) { alert("Error: " + error); }
+        }
+
+        const qRecientes = query(collection(db, "operaciones"), orderBy("fecha", "desc"), limit(15));
+        onSnapshot(qRecientes, (snapshot) => {
+            const historialDiv = document.getElementById("historialSincro");
+            historialDiv.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                const op = docSnap.data();
+                let clase = "txt-egreso"; let s = "-";
+                if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
+                if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
+                const fHumana = new Date(op.fecha).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
+                historialDiv.innerHTML += `
+                    <div class="log-entry">
+                        <div style="flex:1;">
+                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">(${op.concepto})</span><br>
+                            <small style="color:#64748b">${op.subcuenta}</small> | <small style="color:#94a3b8;">${fHumana}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="${clase}" style="margin-bottom: 5px;">${s} $${op.monto.toFixed(2)}</div>
+                            <button class="btn-eliminar" onclick="eliminarMovimiento('${docSnap.id}')">❌</button>
+                        </div>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
