@@ -6,28 +6,32 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest_widget.json?v=1.0.1">
+    <link rel="manifest" href="manifest_widget.json?v=1.0.3">
 
     <title>Saldos RM</title>
     <style>
-        body { margin: 0; padding: 15px; font-family: system-ui, sans-serif; background-color: #0b1a2a; color: white; }
-        h2 { text-align: center; font-size: 1.1rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .cuenta-container { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
-        .header-cuenta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .titulo-cuenta { font-size: 0.95rem; font-weight: bold; }
+        body { margin: 0; padding: 15px; font-family: system-ui, -apple-system, sans-serif; background-color: #0b1a2a; color: white; }
+        h2 { text-align: center; font-size: 1.1rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; letter-spacing: 0.5px; }
+        .cuenta-container { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .header-cuenta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .titulo-cuenta { font-size: 0.95rem; font-weight: bold; color: #f8fafc; }
         .total-cuenta { font-size: 1.4rem; font-weight: 800; }
         
-        /* Desglose Interno del Widget */
-        .desglose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; font-size: 0.78rem; color: #cbd5e1; }
+        /* Sub-Métricas del Widget */
+        .desglose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.03); }
         .sub-valor { font-weight: bold; color: white; display: inline-block; margin-left: 3px; }
         
         .color-banco { color: #60a5fa; }
+        .color-guardadito { color: #38bdf8; }
+        .color-ahorro { color: #0ea5e9; }
+        .color-bbva { color: #a3e635; }
         .color-efectivo { color: #34d399; }
         .color-caja { color: #f59e0b; }
         .color-viaticos { color: #a78bfa; }
         .color-danger { color: #f87171; }
         
-        .btn-volver { display: block; text-align: center; padding: 12px; margin-top: 15px; background: rgba(255,255,255,0.08); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+        .btn-volver { display: block; text-align: center; padding: 14px; margin-top: 20px; background: rgba(255,255,255,0.08); color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .btn-volver:hover { background: rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
@@ -36,12 +40,34 @@
     
     <div class="cuenta-container" style="border-left: 4px solid #60a5fa;">
         <div class="header-cuenta">
-            <span class="titulo-cuenta">🏦 Banco Central</span>
-            <span class="total-cuenta color-banco" id="wBanco">$--</span>
+            <span class="titulo-cuenta">Flujo 🏦 Azteca Principal</span>
+            <span class="total-cuenta color-banco" id="wAztecaP">$--</span>
         </div>
         <div class="desglose-grid">
-            <div>Pagado (Gastos):<span class="sub-valor color-danger" id="wBancoPagado">$0</span></div>
-            <div>Gastos Personales:<span class="sub-valor" id="wBancoPersonal">$0</span></div>
+            <div>Gastos Fijos:<span class="sub-valor color-danger" id="wAztecaPFijos">$0.00</span></div>
+            <div>Otros Egresos:<span class="sub-valor color-danger" id="wAztecaPOtros">$0.00</span></div>
+        </div>
+    </div>
+
+    <div class="cuenta-container" style="border-left: 4px solid #38bdf8;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">💰 Azteca Guardadito</span>
+            <span class="total-cuenta color-guardadito" id="wAztecaG">$--</span>
+        </div>
+    </div>
+
+    <div class="card cuenta-container" style="border-left: 4px solid #0ea5e9; background: rgba(255,255,255,0.04); padding: 12px; margin-bottom: 10px;">
+        <div class="header-cuenta"><span class="titulo-cuenta">📈 Azteca Ahorro</span><span class="total-cuenta color-ahorro" id="wAztecaA">$--</span></div>
+    </div>
+
+    <div class="cuenta-container" style="border-left: 4px solid #a3e635;">
+        <div class="header-cuenta">
+            <span class="titulo-cuenta">💙 BBVA</span>
+            <span class="total-cuenta color-bbva" id="wBBVA">$--</span>
+        </div>
+        <div class="desglose-grid">
+            <div>Total Pagado:<span class="sub-valor color-danger" id="wBBVAGastado">$0.00</span></div>
+            <div>Fondeos Realizados:<span class="sub-valor" id="wBBVATraspasos" style="color:#a3e635;">$0.00</span></div>
         </div>
     </div>
 
@@ -51,21 +77,21 @@
             <span class="total-cuenta color-efectivo" id="wEfectivo">$--</span>
         </div>
         <div class="desglose-grid">
-            <div>Total Entradas:<span class="sub-valor" id="wEfIngresos" style="color:#34d399;">$0</span></div>
-            <div>Total Salidas:<span class="sub-valor color-danger" id="wEfEgresos">$0</span></div>
+            <div>Total Entradas:<span class="sub-valor" id="wEfIngresos" style="color:#34d399;">$0.00</span></div>
+            <div>Total Salidas:<span class="sub-valor color-danger" id="wEfEgresos">$0.00</span></div>
         </div>
     </div>
 
-    <div class="cuenta-container" style="border-left: 4px solid #f59e0b;">
+    <div class="cuenta-container" style="border-left: 4px solid #f59e0b; background: rgba(245,158,11,0.06);">
         <div class="header-cuenta">
-            <span class="titulo-cuenta">📦 Caja Chica TR</span>
+            <span class="titulo-cuenta">📦 Caja Chica TR (Fletes/Gastos)</span>
             <span class="total-cuenta color-caja" id="wCaja">$--</span>
         </div>
         <div class="desglose-grid">
-            <div>Fondeado Banco:<span class="sub-valor" id="wCajaBanco">$0</span></div>
-            <div>Fondeado Efectivo:<span class="sub-valor" id="wCajaEfectivo">$0</span></div>
-            <div style="grid-column: span 2; margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
-                Lo Gastado Total:<span class="sub-valor color-danger" id="wCajaGastado">$0</span>
+            <div>Ingresos Banco:<span class="sub-valor" id="wCajaBanco" style="color:#60a5fa;">$0.00</span></div>
+            <div>Ingresos Efectivo:<span class="sub-valor" id="wCajaEfectivo" style="color:#34d399;">$0.00</span></div>
+            <div style="grid-column: span 2; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; text-align: center;">
+                Lo Gastado Total (Comidas/Otros):<span class="sub-valor color-danger" id="wCajaGastado">$0.00</span>
             </div>
         </div>
     </div>
@@ -76,8 +102,8 @@
             <span class="total-cuenta color-viaticos" id="wViaticos">$--</span>
         </div>
         <div class="desglose-grid">
-            <div>Flete/Asignado:<span class="sub-valor" id="wViaAsignado" style="color:#a78bfa;">$0</span></div>
-            <div>Gastado en Ruta:<span class="sub-valor color-danger" id="wViaGastado">$0</span></div>
+            <div>Asignado / Flete:<span class="sub-valor" id="wViaAsignado" style="color:#a78bfa;">$0.00</span></div>
+            <div>Gastado en Ruta:<span class="sub-valor color-danger" id="wViaGastado">$0.00</span></div>
         </div>
     </div>
 
@@ -101,10 +127,14 @@
         const db = getFirestore(app);
 
         onSnapshot(collection(db, "operaciones"), (snapshot) => {
-            let totales = { "Banco Central": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0 };
+            let totales = {
+                "Azteca - Principal": 0, "Azteca - Guardadito": 0, "Azteca - Ahorro": 0,
+                "BBVA": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0
+            };
             
-            // Sub-métricas dinámicas del widget
-            let bancoPagado = 0; let bancoPersonal = 0;
+            // Sub-métricas analíticas
+            let aztecaPFijos = 0; let aztecaPOtros = 0;
+            let bbvaGastado = 0; let bbvaTraspasos = 0;
             let efIngresos = 0; let efEgresos = 0;
             let cajaBanco = 0; let cajaEfectivo = 0; let cajaGastado = 0;
             let viaAsignado = 0; let viaGastado = 0;
@@ -113,55 +143,71 @@
                 const op = docSnap.data();
                 const m = parseFloat(op.monto) || 0;
 
-                if (op.tipo === "Ingreso") {
-                    if (totales[op.metodo] !== undefined) totales[op.metodo] += m;
-                    
-                    // Estadísticas de Efectivo
-                    if (op.metodo === "Efectivo General") efIngresos += m;
-                    // Estadísticas de Viáticos
-                    if (op.metodo === "Viáticos Operador") viaAsignado += m;
-
-                } else if (op.tipo === "Egreso") {
-                    if (totales[op.metodo] !== undefined) totales[op.metodo] -= m;
-
-                    // Desglose de Banco Central
-                    if (op.metodo === "Banco Central") {
-                        bancoPagado += m;
-                        if (op.empresa === "Empleo" && op.subcuenta === "Gastos Personales") bancoPersonal += m;
-                    }
-                    // Desglose Efectivo
-                    if (op.metodo === "Efectivo General") efEgresos += m;
-                    // Desglose Caja Chica
-                    if (op.metodo === "Caja Chica TR") cajaGastado += m;
-                    // Desglose Viáticos
-                    if (op.metodo === "Viáticos Operador") viaGastado += m;
-
-                } else if (op.tipo === "Intermovimiento") {
+                // 1. CÁLCULO DE SALDOS NETOS LÍQUIDOS
+                if (op.tipo === "Ingreso" && totales[op.metodo] !== undefined) totales[op.metodo] += m;
+                else if (op.tipo === "Egreso" && totales[op.metodo] !== undefined) totales[op.metodo] -= m;
+                else if (op.tipo === "Intermovimiento") {
                     if (totales[op.origen] !== undefined) totales[op.origen] -= m;
                     if (totales[op.destino] !== undefined) totales[op.destino] += m;
+                }
 
-                    // Rastrear cómo se fondeó Caja Chica
-                    if (op.destino === "Caja Chica TR") {
-                        if (op.origen === "Banco Central") cajaBanco += m;
-                        if (op.origen === "Efectivo General") cajaEfectivo += m;
+                // 2. DETECTOR DE CAJA CHICA (Identifica el concepto "Caja Chica" sin importar el banco)
+                const relacionaCajaChica = (op.subcuenta && op.subcuenta.includes("Caja Chica")) || op.metodo === "Caja Chica TR" || op.origen === "Caja Chica TR" || op.destino === "Caja Chica TR";
+                
+                if (relacionaCajaChica) {
+                    if (op.tipo === "Egreso") {
+                        cajaGastado += m; // Suma directa a lo gastado (comidas, otros conceptos)
                     }
+                    if (op.tipo === "Intermovimiento" && op.destino === "Caja Chica TR") {
+                        if (op.origen === "Efectivo General") cajaEfectivo += m;
+                        else if (op.origen === "BBVA" || op.origen.includes("Azteca")) cajaBanco += m;
+                    }
+                    if (op.tipo === "Ingreso" && op.subcuenta === "Caja Chica") {
+                        if (op.metodo === "Efectivo General") cajaEfectivo += m;
+                        else cajaBanco += m;
+                    }
+                }
+
+                // 3. OTRAS SUB-MÉTRICAS (Azteca, BBVA, Efectivo, Viáticos)
+                if (op.metodo === "Azteca - Principal" && op.tipo === "Egreso") {
+                    if (op.subcuenta === "Gastos Fijos") aztecaPFijos += m;
+                    else aztecaPOtros += m;
+                }
+                if (op.metodo === "BBVA" && op.tipo === "Egreso") bbvaGastado += m;
+                if (op.tipo === "Intermovimiento" && op.origen === "BBVA") bbvaTraspasos += m;
+
+                if (op.metodo === "Efectivo General") {
+                    if (op.tipo === "Ingreso") efIngresos += m;
+                    if (op.tipo === "Egreso") efEgresos += m;
+                }
+
+                if ((op.subcuenta && op.subcuenta.includes("Viáticos")) || op.metodo === "Viáticos Operador" || op.origen === "Viáticos Operador" || op.destino === "Viáticos Operador") {
+                    if (op.tipo === "Ingreso") viaAsignado += m;
+                    if (op.tipo === "Egreso") viaGastado += m;
                 }
             });
 
-            // Pintar totales generales
-            document.getElementById("wBanco").textContent = `$${totales["Banco Central"].toFixed(2)}`;
+            // Actualizar interfaz del Widget
+            document.getElementById("wAztecaP").textContent = `$${totales["Azteca - Principal"].toFixed(2)}`;
+            document.getElementById("wAztecaG").textContent = `$${totales["Azteca - Guardadito"].toFixed(2)}`;
+            document.getElementById("wAztecaA").textContent = `$${totales["Azteca - Ahorro"].toFixed(2)}`;
+            document.getElementById("wBBVA").textContent = `$${totales["BBVA"].toFixed(2)}`;
             document.getElementById("wEfectivo").textContent = `$${totales["Efectivo General"].toFixed(2)}`;
             document.getElementById("wCaja").textContent = `$${totales["Caja Chica TR"].toFixed(2)}`;
             document.getElementById("wViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
 
-            // Pintar sub-desgloses analíticos pedidos
-            document.getElementById("wBancoPagado").textContent = `$${bancoPagado.toFixed(2)}`;
-            document.getElementById("wBancoPersonal").textContent = `$${bancoPersonal.toFixed(2)}`;
+            // Pintar desgloses analíticos
+            document.getElementById("wAztecaPFijos").textContent = `$${aztecaPFijos.toFixed(2)}`;
+            document.getElementById("wAztecaPOtros").textContent = `$${aztecaPOtros.toFixed(2)}`;
+            document.getElementById("wBBVAGastado").textContent = `$${bbvaGastado.toFixed(2)}`;
+            document.getElementById("wBBVATraspasos").textContent = `$${bbvaTraspasos.toFixed(2)}`;
             document.getElementById("wEfIngresos").textContent = `$${efIngresos.toFixed(2)}`;
             document.getElementById("wEfEgresos").textContent = `$${efEgresos.toFixed(2)}`;
+            
             document.getElementById("wCajaBanco").textContent = `$${cajaBanco.toFixed(2)}`;
             document.getElementById("wCajaEfectivo").textContent = `$${cajaEfectivo.toFixed(2)}`;
             document.getElementById("wCajaGastado").textContent = `$${cajaGastado.toFixed(2)}`;
+            
             document.getElementById("wViaAsignado").textContent = `$${viaAsignado.toFixed(2)}`;
             document.getElementById("wViaGastado").textContent = `$${viaGastado.toFixed(2)}`;
         });
