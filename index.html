@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.7">
+    <link rel="manifest" href="manifest.json?v=1.0.8">
 
     <title>Ecosistema Financiero RM</title>
     <style>
@@ -19,7 +19,6 @@
         label { font-size: 0.85rem; color: #666; font-weight: 600; margin-top: 12px; display: block; }
         input, select, button { width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         button { background: var(--primary); color: white; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: var(--secondary); }
         
         .grid-saldos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .saldo-box { background: rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
@@ -30,8 +29,8 @@
         .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; margin: 0; }
         .btn-fijo span { display: block; color: var(--danger); font-weight: bold; margin-top: 3px; }
         
-        .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
-        .btn-eliminar:hover { background: var(--danger); color: white; }
+        .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 8px 12px; font-size: 1rem; border-radius: 8px; width: auto; margin: 0; cursor: pointer; }
+        .btn-eliminar:hover { background: #fee2e2; }
         
         .btn-reporte { background: var(--secondary); margin-top: 5px; }
         .btn-excel { background: var(--success); margin-top: 5px; }
@@ -41,16 +40,14 @@
         @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
 
-        .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .txt-ingreso { color: var(--success); font-weight: bold; }
-        .txt-egreso { color: var(--danger); font-weight: bold; }
-        .txt-inter { color: var(--secondary); font-weight: bold; }
-        
         .campo-dinamico { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 8px; margin-top: 5px; display: none; }
-        .tabla-contenedor { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-        th { background: #f1f5f9; padding: 8px; border-bottom: 2px solid #cbd5e1; }
-        td { padding: 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .tabla-contenedor { overflow-x: auto; margin-top: 15px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; background: white; }
+        th { background: #f8fafc; padding: 12px 10px; border-bottom: 2px solid #cbd5e1; color: #0f172a; }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        
+        .alerta-texto { font-size: 0.85rem; color: #b45309; background: #fef3c7; padding: 8px; border-radius: 6px; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
@@ -85,12 +82,15 @@
 
     <div class="card">
         <h3>Nueva Operación / Flujo</h3>
-        <label>Naturaleza</label>
+        
+        <label>Naturaleza (Asegúrate de elegir bien)</label>
         <select id="tipoOperacion" onchange="actualizarSubcuentas()">
-            <option value="Ingreso">📈 Ingreso (Entrada)</option>
-            <option value="Egreso">📉 Egreso (Gasto)</option>
-            <option value="Intermovimiento">🔁 Intermovimiento (Traspaso)</option>
+            <option value="Ingreso">📈 Ingreso (Ganancia / Entrada)</option>
+            <option value="Egreso">📉 Egreso (Gasto / Comida / Casetas)</option>
+            <option value="Intermovimiento">🔁 Intermovimiento (Pasar de un Banco a otro)</option>
         </select>
+        
+        <div id="alertaInter" class="alerta-texto">💡 Los Intermovimientos no registran gastos. Solo úsalos para fondear cuentas (Ej. Mandar dinero a Caja Chica).</div>
 
         <label>Unidad de Negocio</label>
         <select id="unidadNegocio" onchange="actualizarSubcuentas()">
@@ -100,16 +100,16 @@
             <option value="Uber">Uber</option>
         </select>
 
-        <label id="lblSubcuenta">Categoría</label>
+        <label id="lblSubcuenta">Categoría del Movimiento</label>
         <select id="subCuenta" onchange="evaluarCamposEspeciales()"></select>
 
         <div id="wrapperComensales" class="campo-dinamico">
             <label style="color: #92400e; margin-top: 0;">¿Quiénes comieron? (Nombres)</label>
-            <input type="text" id="personasComieron" placeholder="Ej. Said Hernandez, Luis Francisco...">
+            <input type="text" id="personasComieron" placeholder="Ej. Said Hernandez, Luis Francisco Salgado Roman...">
         </div>
 
-        <div id="camposTraspaso" style="display:none;">
-            <label>Origen</label>
+        <div id="camposTraspaso" style="display:none; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+            <label style="margin-top: 0;">¿De dónde sale el dinero? (Origen)</label>
             <select id="cuentaOrigen">
                 <option value="Azteca - Principal">🏦 Azteca - Principal</option>
                 <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
@@ -119,53 +119,60 @@
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
                 <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
-            <label>Destino</label>
+            <label>¿A dónde llega el dinero? (Destino)</label>
             <select id="cuentaDestino">
+                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
+                <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Azteca - Principal">🏦 Azteca - Principal</option>
                 <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
                 <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
                 <option value="BBVA">💙 BBVA</option>
-                <option value="Efectivo General">💵 Efectivo General</option>
-                <option value="Caja Chica TR">📦 Caja Chica TR</option>
-                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
         </div>
 
-        <label>Monto y Cuenta Aplicada</label>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
-            <select id="metodoPago" style="flex: 0.8;">
-                <option value="Azteca - Principal">🏦 Azteca - Principal</option>
-                <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
-                <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
-                <option value="BBVA">💙 BBVA</option>
-                <option value="Efectivo General">💵 Efectivo General</option>
-                <option value="Caja Chica TR">📦 Caja Chica TR</option>
-                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
-            </select>
+        <div id="contenedorMontoNormal">
+            <label id="lblMetodoPago">¿A qué cuenta entró / de qué cuenta salió?</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
+                <select id="metodoPago" style="flex: 0.8;">
+                    <option value="BBVA">💙 BBVA</option>
+                    <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                    <option value="Azteca - Principal">🏦 Azteca - Principal</option>
+                    <option value="Azteca - Guardadito">💰 Azteca - Guardadito</option>
+                    <option value="Azteca - Ahorro">📈 Azteca - Ahorro</option>
+                    <option value="Efectivo General">💵 Efectivo General</option>
+                    <option value="Viáticos Operador">🚛 Viáticos Operador</option>
+                </select>
+            </div>
         </div>
 
         <label>Fecha y Hora</label>
         <input type="datetime-local" id="fechaOp">
 
         <label>Concepto Aclaratorio</label>
-        <input type="text" id="conceptoOp" placeholder="Detalles o descripción del flujo...">
+        <input type="text" id="conceptoOp" placeholder="Detalles, facturas o notas...">
         
         <button id="btnGuardar">Guardar Registro Permanente</button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--success);">
-        <h3>📋 Histórico y Respaldo de Seguridad</h3>
+        <h3>📋 Papeleta de Movimientos y Respaldo</h3>
         <button class="btn-reporte" id="btnCargarHistorico">Ver Tabla Histórica</button>
         <button class="btn-excel" id="btnExportarExcel">📥 Descargar Hoja de Cálculo (CSV)</button>
 
         <div class="tabla-contenedor">
             <table>
                 <thead>
-                    <tr><th>Fecha</th><th>Detalles</th><th>Monto</th><th>Borrar</th></tr>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Detalles</th>
+                        <th>Monto</th>
+                        <th style="text-align: center;">Borrar</th>
+                    </tr>
                 </thead>
                 <tbody id="cuerpoTablaHistorico">
-                    <tr><td colspan="4" style="color: #94a3b8; text-align: center;">Usa los botones para auditar o respaldar la información.</td></tr>
+                    <tr><td colspan="4" style="color: #94a3b8; text-align: center;">Presiona "Ver Tabla Histórica" para cargar.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -206,7 +213,7 @@
 
         const subcuentasNegocio = {
             "Transportes Ramirez": {
-                "Ingreso": ["Viáticos Personales", "Caja Chica"],
+                "Ingreso": ["Viáticos Personales", "Caja Chica", "Flete General", "Reembolso Operativo", "Otros"],
                 "Egreso": ["Caja Chica - Comida", "Caja Chica - Otro Concepto", "Viáticos - Gasolina", "Viáticos - Casetas", "Viáticos - Otro Gasto"]
             },
             "Asistencia Vial RM": { "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"], "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento", "Insumos"] },
@@ -219,13 +226,23 @@
             const empresa = document.getElementById("unidadNegocio").value;
             const subSelector = document.getElementById("subCuenta");
             const camposTraspaso = document.getElementById("camposTraspaso");
+            const alertaInter = document.getElementById("alertaInter");
+            const labelMetodo = document.getElementById("lblMetodoPago");
 
             if (tipo === "Intermovimiento") {
                 subSelector.style.display = "none"; document.getElementById("lblSubcuenta").style.display = "none";
                 camposTraspaso.style.display = "block"; document.getElementById("wrapperComensales").style.display = "none";
+                alertaInter.style.display = "block";
+                labelMetodo.textContent = "Monto a Transferir";
+                document.getElementById("metodoPago").style.display = "none"; // Ocultar el dropdown normal
             } else {
                 subSelector.style.display = "block"; document.getElementById("lblSubcuenta").style.display = "block";
                 camposTraspaso.style.display = "none"; subSelector.innerHTML = "";
+                alertaInter.style.display = "none";
+                document.getElementById("metodoPago").style.display = "block";
+                
+                labelMetodo.textContent = tipo === "Ingreso" ? "¿A qué cuenta entró el dinero?" : "¿De qué cuenta salió el dinero? (Cuenta Aplicada)";
+                
                 subcuentasNegocio[empresa][tipo].forEach(opt => {
                     let el = document.createElement("option"); el.value = opt; el.textContent = opt; subSelector.appendChild(el);
                 });
@@ -239,16 +256,11 @@
         }
         actualizarSubcuentas();
 
-        // MATRIZ DE CÁLCULO DE SALDOS CON LAS NUEVAS CUENTAS BANCARIAS
+        // SALDOS
         onSnapshot(collection(db, "operaciones"), (snapshot) => {
             let totales = {
-                "Azteca - Principal": 0,
-                "Azteca - Guardadito": 0,
-                "Azteca - Ahorro": 0,
-                "BBVA": 0,
-                "Efectivo General": 0,
-                "Caja Chica TR": 0,
-                "Viáticos Operador": 0
+                "Azteca - Principal": 0, "Azteca - Guardadito": 0, "Azteca - Ahorro": 0,
+                "BBVA": 0, "Efectivo General": 0, "Caja Chica TR": 0, "Viáticos Operador": 0
             };
             listaGlobalMovimientos = [];
             snapshot.forEach(docSnap => {
@@ -276,13 +288,12 @@
 
         window.registrarGastoFijo = async function(nombre, monto) {
             if(!confirm(`¿Liquidar ${nombre}?`)) return;
-            // Se descuentan de Azteca Principal por defecto
             try {
                 await addDoc(collection(db, "operaciones"), {
                     tipo: "Egreso", empresa: "Empleo", subcuenta: "Gastos Fijos",
                     monto: monto, metodo: "Azteca - Principal", concepto: `Pago Fijo: ${nombre}`, fecha: new Date().toISOString()
                 });
-                mostrarNotificacion(`✅ ${nombre} guardado en Azteca Principal`, "#28a745");
+                mostrarNotificacion(`✅ ${nombre} liquidado de Azteca Principal`, "#28a745");
             } catch(err) { alert(err); }
         }
 
@@ -292,33 +303,37 @@
             const tipo = document.getElementById("tipoOperacion").value;
             const fechaElegida = document.getElementById("fechaOp").value;
 
-            if(isNaN(monto) || monto <= 0 || !fechaElegida) return mostrarNotificacion("❌ Datos incompletos", "#dc3545");
+            if(isNaN(monto) || monto <= 0 || !fechaElegida) return mostrarNotificacion("❌ Revisa el monto o la fecha", "#dc3545");
 
             let datos = {
                 tipo: tipo, empresa: document.getElementById("unidadNegocio").value,
-                monto: monto, metodo: document.getElementById("metodoPago").value, fecha: new Date(fechaElegida).toISOString()
+                monto: monto, fecha: new Date(fechaElegida).toISOString()
             };
 
             if (tipo === "Intermovimiento") {
                 datos.origen = document.getElementById("cuentaOrigen").value;
                 datos.destino = document.getElementById("cuentaDestino").value;
                 datos.subcuenta = `Traspaso`;
-                datos.concepto = concepto || `De ${datos.origen} a ${datos.destino}`;
+                datos.concepto = concepto || `Fondos movidos`;
             } else {
+                datos.metodo = document.getElementById("metodoPago").value; // Toma el banco aplicado
                 datos.subcuenta = document.getElementById("subCuenta").value;
+                
                 if (datos.subcuenta === "Caja Chica - Comida") {
                     datos.concepto = "Comensales: " + (document.getElementById("personasComieron").value.trim() || "Varios") + " | " + concepto;
-                } else { datos.concepto = concepto || "Sin descripción"; }
+                } else { datos.concepto = concepto || ""; }
             }
 
             try {
                 await addDoc(collection(db, "operaciones"), datos);
                 document.getElementById("montoOp").value = ""; document.getElementById("conceptoOp").value = "";
+                document.getElementById("personasComieron").value = "";
                 reiniciarFechaA_Ahora(); actualizarSubcuentas();
-                mostrarNotificacion("✅ Guardado de forma vitalicia", "#28a745");
+                mostrarNotificacion("✅ Registrado con éxito", "#28a745");
             } catch (err) { alert(err); }
         });
 
+        // PINTAR LA PAPELETA IGUAL A TU IMAGEN PERO MÁS CLARA
         document.getElementById("btnCargarHistorico").addEventListener("click", () => {
             const tabla = document.getElementById("cuerpoTablaHistorico");
             tabla.innerHTML = "";
@@ -328,22 +343,30 @@
             }
             listaGlobalMovimientos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
             listaGlobalMovimientos.forEach(op => {
-                let c = op.tipo === "Ingreso" ? "txt-ingreso" : (op.tipo === "Egreso" ? "txt-egreso" : "txt-inter");
+                let colorMonto = op.tipo === "Ingreso" ? "var(--success)" : "var(--primary)";
                 let f = new Date(op.fecha).toLocaleDateString([], {day:'2-digit',month:'2-digit'});
+                
+                // Esta línea naranja te salvará la vida para auditar: te dice a qué cuenta de banco se fue o de dónde salió.
+                let cuentaImpactada = op.tipo === "Intermovimiento" ? `${op.origen} ➔ ${op.destino}` : op.metodo;
+
                 tabla.innerHTML += `
                     <tr>
-                        <td><strong>${f}</strong><br><small>${op.empresa}</small></td>
-                        <td><small><b>${op.subcuenta}</b></small><br>${op.concepto}</td>
-                        <td class="${c}">$${op.monto.toFixed(2)}</td>
-                        <td><button class="btn-eliminar" onclick="eliminarMovimiento('${op.id}')">❌</button></td>
+                        <td><strong>${f}</strong><br><small style="color:#64748b; white-space:nowrap;">${op.empresa}</small></td>
+                        <td>
+                            <strong>${op.subcuenta}</strong><br>
+                            <span style="color:#475569;">${op.concepto}</span><br>
+                            <small style="color:var(--accent); font-weight:bold;">🏦 ${cuentaImpactada}</small>
+                        </td>
+                        <td style="color:${colorMonto}; font-weight:bold;">$${op.monto.toFixed(2)}</td>
+                        <td style="text-align:center;"><button class="btn-eliminar" onclick="eliminarMovimiento('${op.id}')">❌</button></td>
                     </tr>`;
             });
         });
 
         window.eliminarMovimiento = async function(id) {
-            if(!confirm("¿Eliminar de la nube?")) return;
+            if(!confirm("¿Eliminar este registro de la papeleta?")) return;
             await deleteDoc(doc(db, "operaciones", id));
-            mostrarNotificacion("🗑rm; Eliminado permanentemente", "#dc3545");
+            mostrarNotificacion("🗑️ Eliminado", "#dc3545");
             document.getElementById("btnCargarHistorico").click();
         }
 
