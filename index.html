@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.2">
+    <link rel="manifest" href="manifest.json?v=1.0.3">
 
     <title>Ecosistema Financiero RM</title>
     <style>
@@ -27,9 +27,15 @@
         .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
         .btn-eliminar:hover { background: var(--danger); color: white; }
         
+        /* Monitor de Saldos */
+        .grid-saldos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .saldo-box { background: rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .saldo-box small { display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .saldo-box div { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
+
         /* Grid para Gastos Fijos */
         .grid-fijos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; }
+        .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; margin: 0; }
         .btn-fijo span { display: block; color: var(--danger); font-weight: bold; margin-top: 3px; }
         .btn-fijo:hover { background: #e2e8f0; }
 
@@ -39,9 +45,7 @@
         @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
 
-        /* Botón Instalar App */
         #btnInstalar { display: none; background: var(--accent); margin-bottom: 20px; }
-
         .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
         .log-detalles { flex: 1; }
         .txt-ingreso { color: var(--success); font-weight: bold; }
@@ -53,13 +57,34 @@
 </head>
 <body>
 
-    <h2 style="text-align: center; color: var(--primary); margin-bottom: 10px;">Ecosistema Central RM</h2>
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 15px;">Ecosistema Central RM</h2>
     
     <button id="btnInstalar">📲 Instalar como App Nativa</button>
 
+    <div class="card" style="background: #0b1a2a; color: white; box-shadow: 0 6px 16px rgba(11,26,42,0.25);">
+        <h3 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.15);">💰 Saldos en Tiempo Real</h3>
+        <div class="grid-saldos">
+            <div class="saldo-box">
+                <small>🏦 Banco Central</small>
+                <div id="monBanco" style="color: #60a5fa;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>💵 Efectivo General</small>
+                <div id="monEfectivo" style="color: #34d399;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>📦 Caja Chica TR</small>
+                <div id="monCajaChica" style="color: #f59e0b;">$0.00</div>
+            </div>
+            <div class="saldo-box">
+                <small>🚛 Viáticos Operador</small>
+                <div id="monViaticos" style="color: #a78bfa;">$0.00</div>
+            </div>
+        </div>
+    </div>
+
     <div class="card" style="border-left: 4px solid var(--danger);">
         <h3>📅 Pagos de Viernes y Gastos Fijos</h3>
-        <p style="font-size: 0.85rem; color: #666; margin-top: -5px; margin-bottom: 10px;">Toque un botón para registrar el egreso automáticamente (se descontará del Banco en la sección Personal).</p>
         <div class="grid-fijos">
             <button class="btn-fijo" onclick="registrarGastoFijo('Azteca (Semanal)', 555)">Banco Azteca <span>$555</span></button>
             <button class="btn-fijo" onclick="registrarGastoFijo('Tanda (Semanal)', 500)">Tanda <span>$500</span></button>
@@ -97,12 +122,14 @@
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
             <label>Cuenta de Destino</label>
             <select id="cuentaDestino">
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
         </div>
 
@@ -110,10 +137,15 @@
         <div style="display: flex; gap: 10px;">
             <input type="number" id="montoOp" placeholder="$ 0.00" step="0.01" style="flex: 1.2;">
             <select id="metodoPago" style="flex: 0.8;">
-                <option value="Banco">🏦 Banco</option>
-                <option value="Efectivo">💵 Efectivo</option>
+                <option value="Banco Central">🏦 Banco Central</option>
+                <option value="Efectivo General">💵 Efectivo General</option>
+                <option value="Caja Chica TR">📦 Caja Chica TR</option>
+                <option value="Viáticos Operador">🚛 Viáticos Operador</option>
             </select>
         </div>
+
+        <label>Fecha y Hora del Registro</label>
+        <input type="datetime-local" id="fechaOp">
 
         <label>Concepto / Folio</label>
         <input type="text" id="conceptoOp" placeholder="Ej. Combustible, Refacción, Sueldo...">
@@ -129,9 +161,8 @@
     <div id="toast">Acción realizada con éxito.</div>
 
     <script type="module">
-        // Agregamos importaciones de deleteDoc y doc para poder eliminar
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, getDocs, where, deleteDoc, doc } 
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -146,7 +177,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // FUNCIÓN DE NOTIFICACIONES (TOAST)
+        // ESTABLECER FECHA Y HORA ACTUAL POR DEFECTO
+        function reiniciarFechaA_Ahora() {
+            const ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            document.getElementById('fechaOp').value = ahora.toISOString().slice(0, 16);
+        }
+        reiniciarFechaA_Ahora();
+
+        // NOTIFICACIONES TOAST
         window.mostrarNotificacion = function(mensaje, colorFondo = "#333") {
             const toast = document.getElementById("toast");
             toast.textContent = mensaje;
@@ -155,14 +194,13 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // LÓGICA DE INSTALACIÓN PWA
+        // CONTROL PWA INSTALAR
         let eventoInstalacion;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             eventoInstalacion = e;
             document.getElementById('btnInstalar').style.display = 'block';
         });
-
         document.getElementById('btnInstalar').addEventListener('click', async () => {
             if (eventoInstalacion) {
                 eventoInstalacion.prompt();
@@ -172,7 +210,7 @@
             }
         });
 
-        // SUBCUENTAS
+        // ESTRUCTURA CATEGORÍAS
         const subcuentasNegocio = {
             "Empleo": {
                 "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas/Ahorros"],
@@ -216,7 +254,36 @@
         }
         actualizarSubcuentas();
 
-        // GUARDAR GASTO FIJO (1 CLIC)
+        // 1. MONITOR ANALÍTICO DE SALDOS EN TIEMPO REAL
+        onSnapshot(collection(db, "operaciones"), (snapshot) => {
+            let totales = {
+                "Banco Central": 0,
+                "Efectivo General": 0,
+                "Caja Chica TR": 0,
+                "Viáticos Operador": 0
+            };
+
+            snapshot.forEach(docSnap => {
+                const op = docSnap.data();
+                const m = parseFloat(op.monto) || 0;
+
+                if (op.tipo === "Ingreso") {
+                    if (totales[op.metodo] !== undefined) totales[op.metodo] += m;
+                } else if (op.tipo === "Egreso") {
+                    if (totales[op.metodo] !== undefined) totales[op.metodo] -= m;
+                } else if (op.tipo === "Intermovimiento") {
+                    if (totales[op.origen] !== undefined) totales[op.origen] -= m;
+                    if (totales[op.destino] !== undefined) totales[op.destino] += m;
+                }
+            });
+
+            document.getElementById("monBanco").textContent = `$${totales["Banco Central"].toFixed(2)}`;
+            document.getElementById("monEfectivo").textContent = `$${totales["Efectivo General"].toFixed(2)}`;
+            document.getElementById("monCajaChica").textContent = `$${totales["Caja Chica TR"].toFixed(2)}`;
+            document.getElementById("monViaticos").textContent = `$${totales["Viáticos Operador"].toFixed(2)}`;
+        });
+
+        // REGISTRAR GASTO FIJO (AUTOMÁTICO)
         window.registrarGastoFijo = async function(nombre, monto) {
             if(!confirm(`¿Liquidar ${nombre} por $${monto}?`)) return;
             
@@ -225,9 +292,9 @@
                 empresa: "Empleo",
                 subcuenta: "Gastos Fijos",
                 monto: monto,
-                metodo: "Banco",
+                metodo: "Banco Central",
                 concepto: `Pago Fijo: ${nombre}`,
-                fecha: new Date().toISOString()
+                fecha: new Date().toISOString() // Los automáticos toman la hora actual
             };
 
             try {
@@ -236,13 +303,15 @@
             } catch(err) { alert("Error: " + err); }
         }
 
-        // GUARDAR OPERACIÓN MANUAL
+        // REGISTRAR OPERACIÓN MANUAL (CON FECHA PERSONALIZADA)
         document.getElementById("btnGuardar").addEventListener("click", async () => {
             const monto = parseFloat(document.getElementById("montoOp").value);
             const concepto = document.getElementById("conceptoOp").value.trim();
             const tipo = document.getElementById("tipoOperacion").value;
+            const fechaElegida = document.getElementById("fechaOp").value;
             
             if(isNaN(monto) || monto <= 0) return mostrarNotificacion("❌ Ingrese un monto válido", "#dc3545");
+            if(!fechaElegida) return mostrarNotificacion("❌ Seleccione una fecha válida", "#dc3545");
 
             let datos = {
                 tipo: tipo,
@@ -250,7 +319,7 @@
                 monto: monto,
                 metodo: document.getElementById("metodoPago").value,
                 concepto: concepto || "Sin descripción",
-                fecha: new Date().toISOString()
+                fecha: new Date(fechaElegida).toISOString() // Guarda en formato ISO estándar compatible
             };
 
             if (tipo === "Intermovimiento") {
@@ -265,11 +334,12 @@
                 await addDoc(collection(db, "operaciones"), datos);
                 document.getElementById("montoOp").value = "";
                 document.getElementById("conceptoOp").value = "";
+                reiniciarFechaA_Ahora();
                 mostrarNotificacion("✅ Operación guardada en la nube", "#28a745");
             } catch (err) { alert("Error: " + err); }
         });
 
-        // ELIMINAR MOVIMIENTO
+        // ELIMINAR REGISTRO
         window.eliminarMovimiento = async function(id) {
             if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar este movimiento de la base de datos?")) return;
             try {
@@ -278,7 +348,7 @@
             } catch (error) { alert("Error al eliminar: " + error); }
         }
 
-        // HISTORIAL EN TIEMPO REAL CON BOTÓN ELIMINAR
+        // HISTORIAL LOG
         const qRecientes = query(collection(db, "operaciones"), orderBy("fecha", "desc"), limit(10));
         onSnapshot(qRecientes, (snapshot) => {
             const historialDiv = document.getElementById("historialSincro");
@@ -286,13 +356,28 @@
             
             snapshot.forEach(docSnap => {
                 const op = docSnap.data();
-                const docId = docSnap.id; // Obtenemos el ID único para poder eliminarlo
+                const docId = docSnap.id;
                 
                 let clase = "txt-egreso"; let s = "-";
                 if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
                 if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
                 
+                // Formatear fecha para lectura humana rápida
+                const fHumana = new Date(op.fecha).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
+                
                 historialDiv.innerHTML += `
                     <div class="log-entry">
                         <div class="log-detalles">
-                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">
+                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">(${op.concepto})</span><br>
+                            <small style="color:#64748b">${op.subcuenta}</small> | <small style="color:#94a3b8;">${fHumana}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="${clase}" style="margin-bottom: 5px;">${s} $${op.monto.toFixed(2)}</div>
+                            <button class="btn-eliminar" onclick="eliminarMovimiento('${docId}')">❌ Borrar</button>
+                        </div>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
