@@ -11,12 +11,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1a2a">
-    <link rel="manifest" href="manifest.json?v=1.0.0">
+    <link rel="manifest" href="manifest.json?v=1.0.2">
 
     <title>Ecosistema Financiero RM</title>
     <style>
         :root { --primary: #0b1a2a; --secondary: #1a365d; --success: #28a745; --danger: #dc3545; --accent: #e67e22; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #eaeff5; padding: 15px; max-width: 500px; margin: auto; color: #333; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #eaeff5; padding: 15px; max-width: 500px; margin: auto; color: #333; padding-bottom: 60px; }
         .card { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h3 { margin-top: 0; color: var(--primary); font-size: 1.15rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         label { font-size: 0.85rem; color: #666; font-weight: 600; margin-top: 12px; display: block; }
@@ -24,10 +24,26 @@
         button { background: var(--primary); color: white; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
         button:hover { background: var(--secondary); }
         .btn-informe { background: var(--success); }
-        .btn-informe:hover { background: #218838; }
-        .btn-deuda { background: var(--accent); }
-        .btn-deuda:hover { background: #d35400; }
-        .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; width: auto; margin: 0; }
+        .btn-eliminar:hover { background: var(--danger); color: white; }
+        
+        /* Grid para Gastos Fijos */
+        .grid-fijos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-fijo { background: #f8fafc; color: #333; border: 1px solid #cbd5e1; font-size: 0.85rem; padding: 10px; }
+        .btn-fijo span { display: block; color: var(--danger); font-weight: bold; margin-top: 3px; }
+        .btn-fijo:hover { background: #e2e8f0; }
+
+        /* Notificaciones Tipo Toast */
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        /* Botón Instalar App */
+        #btnInstalar { display: none; background: var(--accent); margin-bottom: 20px; }
+
+        .log-entry { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .log-detalles { flex: 1; }
         .txt-ingreso { color: var(--success); font-weight: bold; }
         .txt-egreso { color: var(--danger); font-weight: bold; }
         .txt-inter { color: var(--secondary); font-weight: bold; }
@@ -37,7 +53,22 @@
 </head>
 <body>
 
-    <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">Ecosistema Central RM</h2>
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 10px;">Ecosistema Central RM</h2>
+    
+    <button id="btnInstalar">📲 Instalar como App Nativa</button>
+
+    <div class="card" style="border-left: 4px solid var(--danger);">
+        <h3>📅 Pagos de Viernes y Gastos Fijos</h3>
+        <p style="font-size: 0.85rem; color: #666; margin-top: -5px; margin-bottom: 10px;">Toque un botón para registrar el egreso automáticamente (se descontará del Banco en la sección Personal).</p>
+        <div class="grid-fijos">
+            <button class="btn-fijo" onclick="registrarGastoFijo('Azteca (Semanal)', 555)">Banco Azteca <span>$555</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Tanda (Semanal)', 500)">Tanda <span>$500</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Gasto (Semanal)', 600)">Gasto Semanal <span>$600</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Telmex (Mensual)', 600)">Telmex <span>$600</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Netflix (Mensual)', 390)">Netflix <span>$390</span></button>
+            <button class="btn-fijo" onclick="registrarGastoFijo('Spotify (Mensual)', 250)">Spotify <span>$250</span></button>
+        </div>
+    </div>
 
     <div class="card">
         <h3>Nueva Operación / Flujo</h3>
@@ -46,14 +77,14 @@
         <select id="tipoOperacion" onchange="actualizarSubcuentas()">
             <option value="Ingreso">📈 Ingreso (Entrada de Dinero)</option>
             <option value="Egreso">📉 Egreso (Gasto / Salida)</option>
-            <option value="Intermovimiento">🔁 Intermovimiento (Traspaso entre Cuentas)</option>
+            <option value="Intermovimiento">🔁 Intermovimiento (Traspaso)</option>
         </select>
 
         <label>Unidad de Negocio Asociada</label>
         <select id="unidadNegocio" onchange="actualizarSubcuentas()">
+            <option value="Empleo">Empleo Personal / Ingresos de Viernes</option>
             <option value="Transportes Ramirez">Transportes Ramirez</option>
             <option value="Asistencia Vial RM">Asistencia Vial RM</option>
-            <option value="Empleo">Empleo Personal</option>
             <option value="Uber">Uber (Ecosistema Compartido)</option>
         </select>
 
@@ -66,14 +97,12 @@
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
-                <option value="Viaticos Operador">🚛 Viáticos Operador</option>
             </select>
             <label>Cuenta de Destino</label>
             <select id="cuentaDestino">
                 <option value="Banco Central">🏦 Banco Central</option>
                 <option value="Efectivo General">💵 Efectivo General</option>
                 <option value="Caja Chica TR">📦 Caja Chica TR</option>
-                <option value="Viaticos Operador">🚛 Viáticos Operador</option>
             </select>
         </div>
 
@@ -86,70 +115,25 @@
             </select>
         </div>
 
-        <label>Concepto / Folio / Nota</label>
-        <input type="text" id="conceptoOp" placeholder="Ej. Combustible camión, Refacción, Turno Uber...">
+        <label>Concepto / Folio</label>
+        <input type="text" id="conceptoOp" placeholder="Ej. Combustible, Refacción, Sueldo...">
         
-        <button id="btnGuardar">Sincronizar con la Nube</button>
+        <button id="btnGuardar">Guardar Registro</button>
     </div>
 
     <div class="card">
-        <h3>Gestor de Deudas / Anticipos</h3>
-        <label>Deudor / Acreedor</label>
-        <input type="text" id="entidadDeuda" placeholder="Ej. Aseguradora AXA, Said Hernandez, Luis Francisco Salgado Roman...">
-        
-        <div style="display: flex; gap: 10px;">
-            <select id="tipoDeuda" style="flex: 1;">
-                <option value="Me_Deben">Le Presté / Me Deben</option>
-                <option value="Debo">Me Prestaron / Debo</option>
-                <option value="Abono_Me_Deben">Abono (A cuenta que me deben)</option>
-                <option value="Abono_Debo">Abono (A cuenta que yo debo)</option>
-            </select>
-            <input type="number" id="montoDeuda" placeholder="$ 0.00" step="0.01" style="flex: 1;">
-        </div>
-        
-        <label>Unidad de Negocio Vinculada</label>
-        <select id="vinculoDeuda">
-            <option value="Asistencia Vial RM">Asistencia Vial RM</option>
-            <option value="Transportes Ramirez">Transportes Ramirez</option>
-            <option value="Personal">Personal / General</option>
-        </select>
-
-        <label>Concepto Específico</label>
-        <input type="text" id="conceptoDeuda" placeholder="Ej. Factura #455, Viáticos extras, etc.">
-        
-        <button id="btnGuardarDeuda" class="btn-deuda">Registrar a Cuenta</button>
+        <h3>Últimos Movimientos Registrados</h3>
+        <div id="historialSincro">Conectando con la nube...</div>
     </div>
 
-    <div class="card">
-        <h3>Informes y Cierres Financieros</h3>
-        <label>Filtrar Reporte Operativo:</label>
-        <select id="tipoInforme">
-            <option value="Todos">Consolidado General Corporativo</option>
-            <option value="Transportes Ramirez">Transportes Ramirez (Global)</option>
-            <option value="Asistencia Vial RM">Asistencia Vial RM</option>
-            <option value="Uber">Uber (Incluye Sincro de Caja Pro)</option>
-            <option value="Empleo">Empleo Personal</option>
-        </select>
-        <button class="btn-informe" id="btnGenerarInforme">Calcular Balance de Área</button>
-
-        <div id="pantallaInforme" class="resumen-box" style="margin-top: 15px; display: none;">
-            <div><strong>Ingresos:</strong><br><span id="infIngresos" style="color:var(--success)">$0</span></div>
-            <div><strong>Egresos:</strong><br><span id="infEgresos" style="color:var(--danger)">$0</span></div>
-            <div><strong>Balance Neto:</strong><br><span id="infBalance">$0</span></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>Últimos Movimientos Sincronizados</h3>
-        <div id="historialSincro">Conectando de forma segura con la nube...</div>
-    </div>
+    <div id="toast">Acción realizada con éxito.</div>
 
     <script type="module">
+        // Agregamos importaciones de deleteDoc y doc para poder eliminar
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, getDocs, where } 
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, getDocs, where, deleteDoc, doc } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // TUS CREDENCIALES PRODUCTIVAS
         const firebaseConfig = {
             apiKey: "AIzaSyBTMr2OwwDr1XR_be7dNmgflEIpLFeb9yQ",
             authDomain: "finanzas-rm.firebaseapp.com",
@@ -162,23 +146,49 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // MAPEO DINÁMICO DE SUBCUENTAS
+        // FUNCIÓN DE NOTIFICACIONES (TOAST)
+        window.mostrarNotificacion = function(mensaje, colorFondo = "#333") {
+            const toast = document.getElementById("toast");
+            toast.textContent = mensaje;
+            toast.style.backgroundColor = colorFondo;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // LÓGICA DE INSTALACIÓN PWA
+        let eventoInstalacion;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            eventoInstalacion = e;
+            document.getElementById('btnInstalar').style.display = 'block';
+        });
+
+        document.getElementById('btnInstalar').addEventListener('click', async () => {
+            if (eventoInstalacion) {
+                eventoInstalacion.prompt();
+                const { outcome } = await eventoInstalacion.userChoice;
+                if (outcome === 'accepted') document.getElementById('btnInstalar').style.display = 'none';
+                eventoInstalacion = null;
+            }
+        });
+
+        // SUBCUENTAS
         const subcuentasNegocio = {
+            "Empleo": {
+                "Ingreso": ["Salario (Viernes)", "Ingresos Extra", "Tandas/Ahorros"],
+                "Egreso": ["Gastos Fijos", "Gastos Personales Variados", "Alimentos"]
+            },
             "Transportes Ramirez": {
-                "Ingreso": ["Flete General", "Reembolso Operativo", "Otros Ingresos TR"],
-                "Egreso": ["Caja Chica TR", "Viáticos (Operadores)", "Combustible TR", "Casetas TR", "Mantenimiento Camión"]
+                "Ingreso": ["Flete General", "Reembolso Operativo", "Otros"],
+                "Egreso": ["Caja Chica TR", "Viáticos", "Combustible", "Casetas", "Mantenimiento"]
             },
             "Asistencia Vial RM": {
-                "Ingreso": ["Servicio de Asistencia (Grúa)", "Venta Refacciones", "Venta Baterías"],
-                "Egreso": ["Sueldo Operador / Comisión", "Gasolina Grúa", "Mantenimiento Equipo", "Insumos de Operación"]
-            },
-            "Empleo": {
-                "Ingreso": ["Salario Quincenal/Mensual", "Ingresos Extra", "Bonos Especiales"],
-                "Egreso": ["Gastos Personales", "Inversión / Ahorro"]
+                "Ingreso": ["Servicio Grúa", "Venta Refacciones", "Baterías"],
+                "Egreso": ["Sueldo Operador", "Gasolina", "Mantenimiento Equipo", "Insumos"]
             },
             "Uber": {
-                "Ingreso": ["Corte Turno Completo (Caja Pro)", "Depósito Semanal App"],
-                "Egreso": ["Gasolina Uber", "Lavado / Limpieza", "Comisiones / Tag Uber", "Mantenimiento Vehículo"]
+                "Ingreso": ["Corte Turno (Caja Pro)", "Depósito App"],
+                "Egreso": ["Gasolina Uber", "Lavado", "Comisiones", "Mantenimiento"]
             }
         };
 
@@ -186,20 +196,18 @@
             const tipo = document.getElementById("tipoOperacion").value;
             const empresa = document.getElementById("unidadNegocio").value;
             const subSelector = document.getElementById("subCuenta");
-            const lblSub = document.getElementById("lblSubcuenta");
             const camposTraspaso = document.getElementById("camposTraspaso");
 
             if (tipo === "Intermovimiento") {
                 subSelector.style.display = "none";
-                lblSub.style.display = "none";
+                document.getElementById("lblSubcuenta").style.display = "none";
                 camposTraspaso.style.display = "block";
             } else {
                 subSelector.style.display = "block";
-                lblSub.style.display = "block";
+                document.getElementById("lblSubcuenta").style.display = "block";
                 camposTraspaso.style.display = "none";
                 subSelector.innerHTML = "";
-                const opciones = subcuentasNegocio[empresa][tipo];
-                opciones.forEach(opt => {
+                subcuentasNegocio[empresa][tipo].forEach(opt => {
                     let el = document.createElement("option");
                     el.value = opt; el.textContent = opt;
                     subSelector.appendChild(el);
@@ -208,13 +216,33 @@
         }
         actualizarSubcuentas();
 
-        // 1. GUARDAR OPERACIÓN / INTERMOVIMIENTO
+        // GUARDAR GASTO FIJO (1 CLIC)
+        window.registrarGastoFijo = async function(nombre, monto) {
+            if(!confirm(`¿Liquidar ${nombre} por $${monto}?`)) return;
+            
+            const datos = {
+                tipo: "Egreso",
+                empresa: "Empleo",
+                subcuenta: "Gastos Fijos",
+                monto: monto,
+                metodo: "Banco",
+                concepto: `Pago Fijo: ${nombre}`,
+                fecha: new Date().toISOString()
+            };
+
+            try {
+                await addDoc(collection(db, "operaciones"), datos);
+                mostrarNotificacion(`✅ ${nombre} registrado con éxito`, "#28a745");
+            } catch(err) { alert("Error: " + err); }
+        }
+
+        // GUARDAR OPERACIÓN MANUAL
         document.getElementById("btnGuardar").addEventListener("click", async () => {
             const monto = parseFloat(document.getElementById("montoOp").value);
             const concepto = document.getElementById("conceptoOp").value.trim();
             const tipo = document.getElementById("tipoOperacion").value;
             
-            if(isNaN(monto) || monto <= 0) return alert("Ingrese un monto válido.");
+            if(isNaN(monto) || monto <= 0) return mostrarNotificacion("❌ Ingrese un monto válido", "#dc3545");
 
             let datos = {
                 tipo: tipo,
@@ -237,89 +265,34 @@
                 await addDoc(collection(db, "operaciones"), datos);
                 document.getElementById("montoOp").value = "";
                 document.getElementById("conceptoOp").value = "";
-                alert("Movimiento financiero sincronizado instantáneamente.");
-            } catch (err) { alert("Error de red: " + err); }
+                mostrarNotificacion("✅ Operación guardada en la nube", "#28a745");
+            } catch (err) { alert("Error: " + err); }
         });
 
-        // 2. GUARDAR DEUDA
-        document.getElementById("btnGuardarDeuda").addEventListener("click", async () => {
-            const deudor = document.getElementById("entidadDeuda").value.trim();
-            const monto = parseFloat(document.getElementById("montoDeuda").value);
-            const concepto = document.getElementById("conceptoDeuda").value.trim();
-            const tipoDeuda = document.getElementById("tipoDeuda").value;
-            
-            if(!deudor || isNaN(monto)) return alert("El nombre y el monto son obligatorios.");
-
-            const datosDeuda = {
-                entidad: deudor.toUpperCase(),
-                tipo: tipoDeuda,
-                monto: monto,
-                empresaVinculada: document.getElementById("vinculoDeuda").value,
-                concepto: concepto || "Actualización de cuenta",
-                fecha: new Date().toISOString()
-            };
-
+        // ELIMINAR MOVIMIENTO
+        window.eliminarMovimiento = async function(id) {
+            if(!confirm("⚠️ ¿Estás seguro de que deseas eliminar este movimiento de la base de datos?")) return;
             try {
-                await addDoc(collection(db, "deudas"), datosDeuda);
-                document.getElementById("entidadDeuda").value = "";
-                document.getElementById("montoDeuda").value = "";
-                document.getElementById("conceptoDeuda").value = "";
-                alert(`Historial actualizado en la nube para: ${datosDeuda.entidad}`);
-            } catch (err) { alert("Error al registrar deuda: " + err); }
-        });
+                await deleteDoc(doc(db, "operaciones", id));
+                mostrarNotificacion("🗑️ Registro eliminado correctamente", "#dc3545");
+            } catch (error) { alert("Error al eliminar: " + error); }
+        }
 
-        // 3. LEER MOVIMIENTOS EN TIEMPO REAL
-        const qRecientes = query(collection(db, "operaciones"), orderBy("fecha", "desc"), limit(5));
+        // HISTORIAL EN TIEMPO REAL CON BOTÓN ELIMINAR
+        const qRecientes = query(collection(db, "operaciones"), orderBy("fecha", "desc"), limit(10));
         onSnapshot(qRecientes, (snapshot) => {
             const historialDiv = document.getElementById("historialSincro");
             historialDiv.innerHTML = "";
             
-            snapshot.forEach(doc => {
-                const op = doc.data();
+            snapshot.forEach(docSnap => {
+                const op = docSnap.data();
+                const docId = docSnap.id; // Obtenemos el ID único para poder eliminarlo
+                
                 let clase = "txt-egreso"; let s = "-";
                 if(op.tipo === "Ingreso") { clase = "txt-ingreso"; s = "+"; }
                 if(op.tipo === "Intermovimiento") { clase = "txt-inter"; s = "🔁"; }
                 
                 historialDiv.innerHTML += `
                     <div class="log-entry">
-                        <div>
-                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">(${op.concepto})</span><br>
-                            <small style="color:#64748b">${op.subcuenta}</small>
-                        </div>
-                        <div class="${clase}">${s} $${op.monto.toFixed(2)}</div>
-                    </div>`;
-            });
-        });
-
-        // 4. CÁLCULO DE INFORMES
-        document.getElementById("btnGenerarInforme").addEventListener("click", async () => {
-            const filtro = document.getElementById("tipoInforme").value;
-            let queryDocs = collection(db, "operaciones");
-            
-            if (filtro !== "Todos") {
-                queryDocs = query(collection(db, "operaciones"), where("empresa", "==", filtro));
-            }
-
-            const snap = await getDocs(queryDocs);
-            let ingresos = 0; let egresos = 0;
-
-            snap.forEach(doc => {
-                const d = doc.data();
-                if(d.tipo === "Ingreso") ingresos += d.monto;
-                if(d.tipo === "Egreso") egresos += d.monto;
-                // Los Intermovimientos no se suman aquí para no inflar los balances de forma irreal.
-            });
-
-            const totalNeto = ingresos - egresos;
-            document.getElementById("infIngresos").textContent = `$${ingresos.toFixed(2)}`;
-            document.getElementById("infEgresos").textContent = `$${egresos.toFixed(2)}`;
-            
-            const balLabel = document.getElementById("infBalance");
-            balLabel.textContent = `$${totalNeto.toFixed(2)}`;
-            balLabel.style.color = totalNeto >= 0 ? "var(--success)" : "var(--danger)";
-            
-            document.getElementById("pantallaInforme").style.display = "flex";
-        });
-    </script>
-</body>
-</html>
+                        <div class="log-detalles">
+                            <strong>${op.empresa}</strong> <span style="font-size:0.8rem;color:#777;">
